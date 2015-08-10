@@ -7,10 +7,17 @@
 #include <random>
 #include <cmath>
 
+const float ParticleManager::ANGLE_RANDOM = -8008.135f;
+
 ParticleManager::ParticleManager()
 {
 
 }
+ParticleManager::ParticleManager(ParticleManager&& other) :
+	mParticles(std::move(other.mParticles))
+{
+}
+
 ParticleManager::~ParticleManager()
 {
 
@@ -36,7 +43,7 @@ void ParticleManager::clearParticles()
 }
 
 ParticleManager::InternalParticle::InternalParticle(const Particle& p) :
-	Life(0)
+	Life(0), Scale(p.StartScale), Color(p.StartColor)
 {
 	(Particle&)*this = p;
 }

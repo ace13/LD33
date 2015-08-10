@@ -1,0 +1,13 @@
+# Finds the Kunlaboro library
+
+find_path(KUNLABORO_INCLUDE_DIR Kunlaboro/Kunlaboro.hpp)
+find_library(KUNLABORO_LIBRARY NAMES Kunlaboro)
+
+set(KUNLABORO_LIBRARIES "${KUNLABORO_LIBRARY}")
+
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Kunlaboro
+	REQUIRED_VARS KUNLABORO_LIBRARIES KUNLABORO_INCLUDE_DIR)
+
+mark_as_advanced(KUNLABORO_INCLUDE_DIR KUNLABORO_LIBRARY)
+

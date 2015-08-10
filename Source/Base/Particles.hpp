@@ -13,7 +13,7 @@ class Engine;
 class ParticleManager
 {
 public:
-	const float ANGLE_RANDOM = -31.337f;
+	static const float ANGLE_RANDOM;
 
 	~ParticleManager();
 
@@ -47,6 +47,7 @@ private:
 	};
 
 	ParticleManager();
+	ParticleManager(ParticleManager&&);
 
 	ParticleManager(const ParticleManager&) = delete;
 	ParticleManager& operator=(const ParticleManager&) = delete;
@@ -62,9 +63,10 @@ private:
 namespace Particles
 {
 	const ParticleManager::Particle SmokePuff{
-		5.f, 1.f, 0.25f, ANGLE_RANDOM, 0.1f,
+		5.f, 1.f, 0.25f, ParticleManager::ANGLE_RANDOM, 0.1f,
 		{}, { 0, -100 },
 		{ 128, 128, 128 },
+		{ 79, 79, 79 },
 		{ 0, 0, 10, 10 }
 	};
 }

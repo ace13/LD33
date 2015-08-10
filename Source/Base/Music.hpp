@@ -48,6 +48,7 @@ public:
 
 private:
 	MusicManager();
+	MusicManager(MusicManager&&);
 
 	MusicManager(const MusicManager&) = delete;
 	MusicManager& operator=(const MusicManager&) = delete;

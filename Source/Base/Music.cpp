@@ -17,7 +17,7 @@ float MusicManager::Track::getVolume() const
 {
 	return mTrack.getVolume();
 }
-void MusicManager::Track::setVolume(float volume, float duration = 0.f)
+void MusicManager::Track::setVolume(float volume, float duration)
 {
 	mVolumeTween.start(mTrack.getVolume(), volume, duration);
 }
@@ -49,6 +49,10 @@ void MusicManager::Track::update(float dt)
 MusicManager::MusicManager()
 {
 
+}
+MusicManager::MusicManager(MusicManager&& other) :
+	mTracks(std::move(other.mTracks))
+{
 }
 MusicManager::~MusicManager()
 {
