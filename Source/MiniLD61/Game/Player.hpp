@@ -23,8 +23,9 @@ public:
 
 private:
 	bool mFirst;
+	float mTime, mTargetX, mAnger;
 	sf::Texture mPlayerTex;
-	sf::Vector2f mCameraPos;
+	sf::Vector2f mCameraPos, mCameraSize;
 	Physical* mPhysical;
 
 };
