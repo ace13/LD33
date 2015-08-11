@@ -35,8 +35,8 @@ void Player::addedToEntity()
 		drawUI(target);
 	});
 	requestMessage("LD33.Event", [this](const Kunlaboro::Message& msg){
-		auto ev = msg.payload.get<sf::Event>();
-		event(ev);
+		auto ev = msg.payload.get<sf::Event*>();
+		event(*ev);
 	});
 	requestMessage("LD33.Update", [this](const Kunlaboro::Message& msg){
 		float dt = msg.payload.get<float>();

@@ -3,6 +3,7 @@
 #include <Base/Engine.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Window/Event.hpp>
 
 #include <random>
 
@@ -15,12 +16,21 @@ void GameState::addedToEntity()
 {
 	getEntitySystem()->createEntity("Game.Player");
 
+	requestMessage("LD33.Event", [this](const Kunlaboro::Message& msg){
+		event(*msg.payload.get<sf::Event*>());
+	});
 	requestMessage("LD33.Tick", [this](const Kunlaboro::Message& msg){
 		tick(msg.payload.get<float>());
 	});
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg){
 		draw(*msg.payload.get<sf::RenderTarget*>());
 	});
+}
+
+void GameState::event(sf::Event& ev)
+{
+	if (ev.type == sf::Event::KeyReleased && ev.key.code == sf::Keyboard::Escape)
+		Engine::get<Engine>().close();
 }
 
 void GameState::tick(float dt)

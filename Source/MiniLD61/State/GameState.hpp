@@ -2,7 +2,7 @@
 
 #include <Kunlaboro/Component.hpp>
 
-namespace sf { class RenderTarget; }
+namespace sf { struct Event; class RenderTarget; }
 
 class GameState : public Kunlaboro::Component
 {
@@ -12,8 +12,9 @@ public:
 
 	void addedToEntity();
 
+	void event(sf::Event& ev);
 	void tick(float dt);
-	void draw(sf::RenderTarget&);
+	void draw(sf::RenderTarget& target);
 
 	void addCloud();
 
