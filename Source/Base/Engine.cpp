@@ -130,13 +130,14 @@ void Engine::run()
 
 			{ PROFILE_BLOCK("Game");
 				mWindow->setView(gameView);
-				mSystem->sendGlobalMessage("LD33.Draw", mWindow);
+				mSystem->sendGlobalMessage("LD33.Draw", (sf::RenderTarget*)mWindow);
+				mParticles.draw(*mWindow);
 				gameView = mWindow->getView();
 			}
 
 			{ PROFILE_BLOCK("UI");
 				mWindow->setView(uiView);
-				mSystem->sendGlobalMessage("LD33.DrawUI", mWindow);
+				mSystem->sendGlobalMessage("LD33.DrawUI", (sf::RenderTarget*)mWindow);
 				mWindow->draw(profilingText);
 			}
 

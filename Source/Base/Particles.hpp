@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 #include <list>
 
@@ -32,6 +33,8 @@ public:
 		sf::FloatRect Rect; ///< Texture rect for the particle
 	};
 
+	void setTexture(sf::Texture&&);
+
 	void addParticle(const Particle& p, const sf::Vector2f& position);
 	void clearParticles();
 
@@ -56,17 +59,18 @@ private:
 	void draw(sf::RenderTarget& target);
 
 	std::list<InternalParticle> mParticles;
+	sf::Texture mTexture;
 
 	friend class Engine;
 };
 
 namespace Particles
 {
-	const ParticleManager::Particle SmokePuff{
-		5.f, 1.f, 0.25f, ParticleManager::ANGLE_RANDOM, 0.1f,
-		{}, { 0, -100 },
-		{ 128, 128, 128 },
-		{ 79, 79, 79 },
-		{ 0, 0, 10, 10 }
+	const ParticleManager::Particle CloudPuff{
+		10.f, 2.f, 1.75f, ParticleManager::ANGLE_RANDOM, 0.1f,
+		{ 0, 500 }, { 0, 0 },
+		{ 128, 128, 128, 129 },
+		{ 179, 179, 179, 129 },
+		{ 100, 100, 200, 200 }
 	};
 }

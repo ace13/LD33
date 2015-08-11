@@ -14,7 +14,7 @@ ParticleManager::ParticleManager()
 
 }
 ParticleManager::ParticleManager(ParticleManager&& other) :
-	mParticles(std::move(other.mParticles))
+	mParticles(std::move(other.mParticles)), mTexture(std::move(other.mTexture))
 {
 }
 
@@ -22,9 +22,15 @@ ParticleManager::~ParticleManager()
 {
 
 }
+
+void ParticleManager::setTexture(sf::Texture&& tex)
+{
+	mTexture = std::move(tex);
+}
+
 void ParticleManager::addParticle(const Particle& p, const sf::Vector2f& position)
 {
-	InternalParticle ip = p;
+	InternalParticle ip{ p };
 
 	ip.Position = position;
 	if (ip.Angle == ANGLE_RANDOM)
@@ -68,7 +74,7 @@ void ParticleManager::update(float dt)
 		p.Position += p.Velocity * dt;
 		p.Angle    += p.Rotation * dt;
 		p.Scale     = p.StartScale + perc * (p.EndScale - p.StartScale);
-		
+
 		if (p.Life >= p.Duration)
 			it = mParticles.erase(it);
 		else
@@ -106,6 +112,6 @@ void ParticleManager::draw(sf::RenderTarget& target)
 			{ p.Rect.left, p.Rect.top + p.Rect.height } });
 	}
 
-	//sf::RenderStates states{ &texture };
-	target.draw(vex); //(vex, states);
+	sf::RenderStates states{ &mTexture };
+	target.draw(vex, states);
 }
