@@ -23,8 +23,8 @@ public:
 
 private:
 	bool mFirst;
-	float mTime, mTargetX, mAnger;
-	sf::Texture mPlayerTex;
+	float mTime, mTargetX, mExcitement;
+	sf::Texture mPlayerTex, mPlayerWingTex;
 	sf::Vector2f mCameraPos, mCameraSize;
 	Physical* mPhysical;
 

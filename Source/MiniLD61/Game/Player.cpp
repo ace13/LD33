@@ -7,8 +7,9 @@
 #include <SFML/Window/Event.hpp>
 
 Player::Player() : Kunlaboro::Component("Game.Player"),
-	mFirst(true), mTime(0), mTargetX(0), mAnger(0), mPhysical(nullptr)
+	mFirst(true), mTime(0), mTargetX(0), mExcitement(0), mPhysical(nullptr)
 {
+	mPlayerWingTex.loadFromFile("Resources/PlayerAnim.png");
 	mPlayerTex.loadFromFile("Resources/Player.png");
 	mPlayerTex.setSmooth(true);
 }
@@ -60,11 +61,11 @@ void Player::event(sf::Event& ev)
 			mTargetX = 950; break;
 
 		case sf::Keyboard::Num1:
-			mAnger = 0; break;
+			mExcitement = 0; break;
 		case sf::Keyboard::Num2:
-			mAnger = 1; break;
+			mExcitement = 1; break;
 		case sf::Keyboard::Num3:
-			mAnger = 2; break;
+			mExcitement = 2; break;
 
 		default:
 			break;
@@ -93,11 +94,20 @@ void Player::update(float dt)
 
 	float curX = mPhysical->getVelocity().x;
 	mPhysical->setVelocity({ curX + (mTargetX - curX) * dt * 2, 0 });
+
 	auto pos = mPhysical->getPosition();
-	if (pos.x < mCameraSize.x / -8.f)
-		pos.x = mCameraSize.x / -8.f;
-	else if (pos.x > mCameraSize.x / 8.f)
-		pos.x = mCameraSize.x / 8.f;
+	if (pos.x < mCameraSize.x / -16.f)
+	{
+		if (pos.x < mCameraSize.x / -2.f)
+			mPhysical->setPosition({ mCameraSize.x / -2.f, mPhysical->getPosition().y });
+		pos.x = mCameraSize.x / -16.f;
+	}
+	else if (pos.x > mCameraSize.x / 16.f)
+	{
+		if (pos.x > mCameraSize.x / 2.f)
+			mPhysical->setPosition({ mCameraSize.x / 2.f, mPhysical->getPosition().y });
+		pos.x = mCameraSize.x / 16.f;
+	}
 
 	mCameraPos += (pos - CAMERA_OFFSET - mCameraPos) * (dt * 2.5f);
 	mTime += dt;
@@ -117,11 +127,17 @@ void Player::draw(sf::RenderTarget& target)
 	target.setView(view);
 
 	sf::Sprite player(mPlayerTex);
-    player.setOrigin((sf::Vector2f)mPlayerTex.getSize() / 2.f);
+    player.setOrigin({ 125.f, 125.f });
     player.setPosition(mPhysical->getPosition());
 
     float xSpeed = mPhysical->getVelocity().x;
-    player.setRotation(xSpeed / 200);
+    player.setRotation(xSpeed / 175);
+    target.draw(player);
+
+	int tex = int(mTime * 2) % 4;
+	player.setTexture(mPlayerWingTex);
+	player.setTextureRect({ tex % 2 * 250, tex / 2 * 250, 250, 250 });
+	target.draw(player);
 
 	sf::RectangleShape segment({ 25, 5 });
 	segment.setOrigin({ 12.5f, 2.5f });
@@ -145,12 +161,11 @@ void Player::draw(sf::RenderTarget& target)
     		segment.scale(0.4f, 1);
 
 		target.draw(segment);
-		segment.move(xDir * std::sin(i / (3.f + mAnger) + mTime * (2.5f + mAnger)*-1) + yDir * 5.f);
+		segment.move(xDir * std::sin(i / (3.f + mExcitement) + mTime * (2.5f + mExcitement)*-1) + yDir * 5.f);
 
 		segment.scale(0.93f, 1);
     }
 
-    target.draw(player);
 }
 
 void Player::drawUI(sf::RenderTarget& target)
