@@ -107,7 +107,7 @@ void Engine::run()
     		} break;
 
 			default:
-				mSystem->sendGlobalMessage("LD33.Event", ev);
+				mSystem->sendGlobalMessage("LD33.Event", &ev);
 				break;
 			}
 		}
@@ -141,7 +141,7 @@ void Engine::run()
 				mWindow->draw(profilingText);
 			}
 
-			mWindow->display();
+			PROFILE_CALL("Display", mWindow->display());
 		}
 
 		Profiler::endBlock(); // Frame
@@ -157,6 +157,11 @@ void Engine::run()
 	}
 }
 
+void Engine::close()
+{
+	mWindow->close();
+}
+
 template<>
 MusicManager& Engine::get()
 {
@@ -167,5 +172,11 @@ template<>
 ParticleManager& Engine::get()
 {
 	return sEngine->mParticles;
+}
+
+template<>
+Engine& Engine::get()
+{
+	return *sEngine;
 }
 

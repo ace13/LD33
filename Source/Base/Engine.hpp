@@ -19,6 +19,8 @@ public:
 	void setWindow(sf::RenderWindow& window);
 	void run();
 
+	void close();
+
 	template<typename T>
 	static T& get();
 
