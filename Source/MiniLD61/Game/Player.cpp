@@ -131,10 +131,10 @@ void Player::draw(sf::RenderTarget& target)
     player.setPosition(mPhysical->getPosition());
 
     float xSpeed = mPhysical->getVelocity().x;
-    player.setRotation(xSpeed / 175);
+    player.setRotation(xSpeed / 100);
     target.draw(player);
 
-	int tex = int(mTime * 2) % 4;
+	int tex = int(mTime * 2.f) % 4;
 	player.setTexture(mPlayerWingTex);
 	player.setTextureRect({ tex % 2 * 250, tex / 2 * 250, 250, 250 });
 	target.draw(player);
