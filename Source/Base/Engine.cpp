@@ -112,7 +112,7 @@ void Engine::run()
 			}
 		}
 
-		while (time >= tickRate)
+		while (time > tickRate)
 		{ PROFILE_BLOCK("Tick");
 			mMusic.update(TICK_RATE);
 
