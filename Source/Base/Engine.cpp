@@ -1,10 +1,15 @@
 #include "Engine.hpp"
+#include "Fonts.hpp"
+#include "Profiling.hpp"
 
 #include <Kunlaboro/EntitySystem.hpp>
+
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include <chrono>
+#include <sstream>
 #include <stdexcept>
 
 namespace {
@@ -53,9 +58,32 @@ void Engine::run()
 		);
 
 	sf::Event ev;
+	sf::Text profilingText("", sf::getDefaultFont(), 10U);
+	sf::View uiView = mWindow->getDefaultView(), gameView({}, { 0, 2500 });
+	{
+        sf::Vector2f size = (sf::Vector2f)mWindow->getSize();
+        uiView.setSize(size);
+        uiView.setCenter(size / 2.f);
+
+        gameView.setSize(gameView.getSize().y * (size.x / size.y), gameView.getSize().y);
+    }
+
+	// Prime the profiler
+	{ PROFILE_BLOCK("Frame");
+		{ PROFILE_BLOCK("Events"); }
+		{ PROFILE_BLOCK("Tick"); }
+		{ PROFILE_BLOCK("Update"); }
+		{ PROFILE_BLOCK("Draw");
+			{ PROFILE_BLOCK("Game"); }
+			{ PROFILE_BLOCK("UI"); }
+		}
+	} Profiler::resetBlocks();
+    auto root = Profiler::getRoot()->getChild("Frame");
 
 	while (mWindow->isOpen())
 	{
+		Profiler::startBlock("Frame");
+
 		lastFrame = frame;
 		frame = std::chrono::high_resolution_clock::now();
 
@@ -64,35 +92,67 @@ void Engine::run()
 		time += dt;
 
 		while (mWindow->pollEvent(ev))
-		{
+		{ PROFILE_BLOCK("Events");
 			switch(ev.type)
 			{
-				case sf::Event::Closed:
-					mWindow->close(); break;
+			case sf::Event::Closed:
+				mWindow->close(); break;
+			case sf::Event::Resized:
+			{
+        		sf::Vector2f size = (sf::Vector2f)mWindow->getSize();
+        		uiView.setSize(size);
+        		uiView.setCenter(size / 2.f);
 
-				default:
-					mSystem->sendGlobalMessage("LD33.Event", ev);
-					break;
+        		gameView.setSize(gameView.getSize().y * (size.x / size.y), gameView.getSize().y);
+    		} break;
+
+			default:
+				mSystem->sendGlobalMessage("LD33.Event", ev);
+				break;
 			}
 		}
 
 		while (time >= tickRate)
-		{
+		{ PROFILE_BLOCK("Tick");
 			mMusic.update(TICK_RATE);
 
 			mSystem->sendGlobalMessage("LD33.Tick", TICK_RATE);
 			time -= tickRate;
 		}
 
-		mParticles.update(dtFloat);
-		mSystem->sendGlobalMessage("LD33.Update", dtFloat);
+		{ PROFILE_BLOCK("Update");
+			mParticles.update(dtFloat);
+			mSystem->sendGlobalMessage("LD33.Update", dtFloat);
+		}
 
-		mWindow->clear();
+		{ PROFILE_BLOCK("Draw");
+			mWindow->clear();
 
-		mSystem->sendGlobalMessage("LD33.Draw", mWindow);
-		mSystem->sendGlobalMessage("LD33.DrawUI", mWindow);
+			{ PROFILE_BLOCK("Game");
+				mWindow->setView(gameView);
+				mSystem->sendGlobalMessage("LD33.Draw", mWindow);
+				gameView = mWindow->getView();
+			}
 
-		mWindow->display();
+			{ PROFILE_BLOCK("UI");
+				mWindow->setView(uiView);
+				mSystem->sendGlobalMessage("LD33.DrawUI", mWindow);
+				mWindow->draw(profilingText);
+			}
+
+			mWindow->display();
+		}
+
+		Profiler::endBlock(); // Frame
+
+		if (root->getTotalTime() >= std::chrono::seconds(1))
+        {
+            std::ostringstream oss;
+            oss << *root << std::endl;
+            profilingText.setString(oss.str());
+
+            Profiler::resetBlocks();
+        }
 	}
 }
 
