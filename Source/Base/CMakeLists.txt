@@ -1,6 +1,7 @@
 SET(Headers
 	Engine.hpp
 	Fonts.hpp
+	Input.hpp
 	Music.hpp
 	Particles.hpp
 	Profiling.hpp
@@ -11,6 +12,7 @@ SET(Headers
 SET(Sources
 	Engine.cpp
 	Fonts.cpp
+	Input.cpp
 	Music.cpp
 	Particles.cpp
 	Profiling.cpp
