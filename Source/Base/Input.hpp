@@ -12,6 +12,7 @@ public:
 	struct Bind
 	{
 		enum {
+			None,
 			KeyboardKey,
 			JoystickButton,
 			JoystickAxis
@@ -20,17 +21,17 @@ public:
 		union
 		{
 			struct {
-				sf::Keyboard::Key Key;
-			} KeyboardKey;
+				sf::Keyboard::Key Code;
+			} Key;
 			struct {
 				unsigned int Joystick;
 				unsigned int Button;
-			} JoystickButton;
+			} Button;
 			struct {
 				unsigned int Joystick;
 				sf::Joystick::Axis Axis;
 				bool Negative;
-			} JoystickAxis;
+			} Axis;
 		};
 	};
 
@@ -39,12 +40,16 @@ public:
 
 	void linkBinds(unsigned int id, unsigned int lower, unsigned int upper);
 
+	float getValue(unsigned int bind) const;
 
 private:
 	struct InternalBind
 	{
-		Bind Bind;
-		float Data;
+		InternalBind() = default;
+		InternalBind(Bind&&);
+
+		InputManager::Bind IBind;
+		float Value;
 
 		float getValue() const;
 
