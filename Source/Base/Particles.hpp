@@ -17,6 +17,11 @@ class ParticleManager
 public:
 	static const float ANGLE_RANDOM;
 
+	enum
+	{
+		NumLayers = 3
+	};
+
 	~ParticleManager();
 
 	/// Particle data

@@ -10,12 +10,14 @@
 
 const float ParticleManager::ANGLE_RANDOM = -8008.135f;
 
-ParticleManager::ParticleManager()
+ParticleManager::ParticleManager() :
+	mNextLayer(Particle::Bottommost)
 {
 
 }
 ParticleManager::ParticleManager(ParticleManager&& other) :
-	mTexture(std::move(other.mTexture)), mNextLayer(Particle::Bottommost), mParticles(std::move(other.mParticles))
+	mTexture(std::move(other.mTexture)), mNextLayer(std::move(other.mNextLayer)),
+	mParticles(std::move(other.mParticles))
 {
 }
 
@@ -71,9 +73,15 @@ void ParticleManager::InternalManager::addedToEntity()
 	mLayer = man.mNextLayer;
 	switch (mLayer)
 	{
-	case ParticleManager::Particle::Bottommost: man.mNextLayer = ParticleManager::Particle::Default; break;
-	case ParticleManager::Particle::Default: man.mNextLayer = ParticleManager::Particle::Topmost; break;
-	default: break;
+	case ParticleManager::Particle::Bottommost:
+		printf("Bottommost\n");
+		man.mNextLayer = ParticleManager::Particle::Default; break;
+	case ParticleManager::Particle::Default:
+		printf("Default\n");
+		man.mNextLayer = ParticleManager::Particle::Topmost; break;
+	default:
+		printf("Topmost\n");
+		break;
 	}
 
 	requestMessage("LD33.Update", [this](const Kunlaboro::Message& msg) {

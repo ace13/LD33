@@ -53,9 +53,6 @@ void Engine::setSystem(Kunlaboro::EntitySystem& sys)
 	mSystem = &sys;
 
 	sys.registerComponent<ParticleManager::InternalManager>("LD33.Engine.ParticleManager");
-	sys.registerTemplate("LD33.Engine.ParticleManager", {
-		"LD33.Engine.ParticleManager", "LD33.Engine.ParticleManager", "LD33.Engine.ParticleManager"
-	});
 }
 void Engine::setWindow(sf::RenderWindow& window)
 {
@@ -67,7 +64,9 @@ void Engine::run()
 	if (!mWindow || !mSystem)
 		throw std::runtime_error("Missing window or entity system");
 
-	mSystem->createEntity("LD33.Engine.ParticleManager");
+	auto eid = mSystem->createEntity();
+	for (int i = 0; i < ParticleManager::NumLayers; ++i)
+		mSystem->addComponent(eid, "LD33.Engine.ParticleManager");
 
 	auto frame = std::chrono::high_resolution_clock::now(),
 	     lastFrame = frame;
