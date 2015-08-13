@@ -1,5 +1,9 @@
 #include "Player.hpp"
 #include "Components.hpp"
+#include "../Binds.hpp"
+
+#include <Base/Engine.hpp>
+#include <Base/Input.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -49,7 +53,7 @@ void Player::addedToEntity()
 
 void Player::event(sf::Event& ev)
 {
-	if (ev.type == sf::Event::KeyPressed)
+/*	if (ev.type == sf::Event::KeyPressed)
 	{
 		switch (ev.key.code)
 		{
@@ -85,11 +89,12 @@ void Player::event(sf::Event& ev)
 			break;
 		}
 	}
-
+*/
 }
 
 void Player::update(float dt)
 {
+	mTargetX = Engine::get<InputManager>().getValue(Bind_Horizontal) * 950;
 	const sf::Vector2f CAMERA_OFFSET{ 0, 950 };
 
 	float curX = mPhysical->getVelocity().x;

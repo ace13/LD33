@@ -1,6 +1,9 @@
 #include "Components.hpp"
+#include "Binds.hpp"
 
 #include <Base/Engine.hpp>
+#include <Base/Input.hpp>
+#include <Base/Particles.hpp>
 #include <Kunlaboro/EntitySystem.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -26,6 +29,17 @@ int main(int argc, char** argv)
 	eng.setSystem(sys);
 	eng.setWindow(window);
 
+	// Input setup
+	auto& inp = Engine::get<InputManager>();
+	inp.setBind(Bind_Left, { InputManager::Bind::KeyboardKey, sf::Keyboard::A });
+	inp.setBind(Bind_Right, { InputManager::Bind::KeyboardKey, sf::Keyboard::D });
+	inp.setBind(Bind_Up, { InputManager::Bind::KeyboardKey, sf::Keyboard::W });
+	inp.setBind(Bind_Down, { InputManager::Bind::KeyboardKey, sf::Keyboard::S });
+
+	inp.linkBinds(Bind_Horizontal, Bind_Left, Bind_Right);
+	inp.linkBinds(Bind_Vertical, Bind_Up, Bind_Down);
+
+	// Particle setup
 	sf::Texture particles;
 	particles.loadFromFile("Resources/Particles.png");
 	Engine::get<ParticleManager>().setTexture(std::move(particles));

@@ -1,6 +1,7 @@
 #include "GameState.hpp"
 
 #include <Base/Engine.hpp>
+#include <Base/Particles.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Window/Event.hpp>
