@@ -74,13 +74,10 @@ void ParticleManager::InternalManager::addedToEntity()
 	switch (mLayer)
 	{
 	case ParticleManager::Particle::Bottommost:
-		printf("Bottommost\n");
 		man.mNextLayer = ParticleManager::Particle::Default; break;
 	case ParticleManager::Particle::Default:
-		printf("Default\n");
 		man.mNextLayer = ParticleManager::Particle::Topmost; break;
 	default:
-		printf("Topmost\n");
 		break;
 	}
 
