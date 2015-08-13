@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Music.hpp"
-#include "Particles.hpp"
-
 namespace Kunlaboro { class EntitySystem; }
 namespace sf { class RenderWindow; }
 
@@ -27,9 +24,6 @@ public:
 private:
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
-
-	MusicManager mMusic;
-	ParticleManager mParticles;
 
 	sf::RenderWindow* mWindow;
 	Kunlaboro::EntitySystem* mSystem;

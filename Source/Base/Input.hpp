@@ -4,6 +4,8 @@
 
 #include <unordered_map>
 
+class Engine;
+
 class InputManager
 {
 public:
@@ -65,5 +67,7 @@ private:
 	void handleEvent(sf::Event&);
 
 	std::unordered_map<unsigned int, InternalBind> mBinds;
+
+	friend class Engine;
 };
 

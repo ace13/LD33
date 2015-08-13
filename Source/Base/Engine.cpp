@@ -1,5 +1,8 @@
 #include "Engine.hpp"
 #include "Fonts.hpp"
+#include "Input.hpp"
+#include "Music.hpp"
+#include "Particles.hpp"
 #include "Profiling.hpp"
 
 #include <Kunlaboro/EntitySystem.hpp>
@@ -13,7 +16,11 @@
 #include <stdexcept>
 
 namespace {
-	Engine* sEngine;
+	Engine* sEngine = nullptr;
+
+	InputManager* sInput = nullptr;
+	MusicManager* sMusic = nullptr;
+	ParticleManager* sParticles = nullptr;
 }
 
 
@@ -23,15 +30,25 @@ Engine::Engine() :
 	mWindow(nullptr)
 {
 	sEngine = this;
+
+	sInput = new InputManager;
+	sMusic = new MusicManager;
+	sParticles = new ParticleManager;
 }
 Engine::Engine(Engine&& other) :
-	mMusic(std::move(other.mMusic)), mParticles(std::move(other.mParticles)),
-	mWindow(std::move(other.mWindow))
+	mWindow(std::move(other.mWindow)), mSystem(std::move(other.mSystem))
 {
+	sEngine = this;
 }
 
 Engine::~Engine()
 {
+	if (sEngine == this)
+	{
+		delete sInput;
+		delete sMusic;
+		delete sParticles;
+	}
 }
 
 void Engine::setSystem(Kunlaboro::EntitySystem& sys)
@@ -107,6 +124,7 @@ void Engine::run()
     		} break;
 
 			default:
+				sInput->handleEvent(ev);
 				mSystem->sendGlobalMessage("LD33.Event", &ev);
 				break;
 			}
@@ -114,14 +132,14 @@ void Engine::run()
 
 		while (time > tickRate)
 		{ PROFILE_BLOCK("Tick");
-			mMusic.update(TICK_RATE);
+			sMusic->update(TICK_RATE);
 
 			mSystem->sendGlobalMessage("LD33.Tick", TICK_RATE);
 			time -= tickRate;
 		}
 
 		{ PROFILE_BLOCK("Update");
-			mParticles.update(dtFloat);
+			sParticles->update(dtFloat);
 			mSystem->sendGlobalMessage("LD33.Update", dtFloat);
 		}
 
@@ -131,7 +149,7 @@ void Engine::run()
 			{ PROFILE_BLOCK("Game");
 				mWindow->setView(gameView);
 				mSystem->sendGlobalMessage("LD33.Draw", (sf::RenderTarget*)mWindow);
-				mParticles.draw(*mWindow);
+				sParticles->draw(*mWindow);
 				gameView = mWindow->getView();
 			}
 
@@ -163,15 +181,21 @@ void Engine::close()
 }
 
 template<>
+InputManager& Engine::get()
+{
+	return *sInput;
+}
+
+template<>
 MusicManager& Engine::get()
 {
-	return sEngine->mMusic;
+	return *sMusic;
 }
 
 template<>
 ParticleManager& Engine::get()
 {
-	return sEngine->mParticles;
+	return *sParticles;
 }
 
 template<>
