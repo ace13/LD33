@@ -59,7 +59,7 @@ void InputManager::handleEvent(sf::Event& ev)
 		{
 		case sf::Event::KeyPressed:
 		case sf::Event::KeyReleased:
-			if (b.IBind.Type == Bind::KeyboardKey)
+			if (b.IBind.Type == Bind::KeyboardKey && b.IBind.Key.Code == ev.key.code)
 			{
 				float value = float(ev.type == sf::Event::KeyPressed);
 				b.Value = value;
