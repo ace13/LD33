@@ -54,22 +54,28 @@ void Player::update(float dt)
 	const sf::Vector2f CAMERA_OFFSET{ 0, 950 };
 
 	float curX = mPhysical->getVelocity().x;
-	mPhysical->setVelocity({ curX + (mTargetX - curX) * dt * 2, 0 });
 
 	auto pos = mPhysical->getPosition();
 	if (pos.x < mCameraSize.x / -16.f)
 	{
 		if (pos.x < mCameraSize.x / -2.f)
+		{
+			mTargetX = 500;
 			mPhysical->setPosition({ mCameraSize.x / -2.f, mPhysical->getPosition().y });
+		}
 		pos.x = mCameraSize.x / -16.f;
 	}
 	else if (pos.x > mCameraSize.x / 16.f)
 	{
 		if (pos.x > mCameraSize.x / 2.f)
+		{
+			mTargetX = -500;
 			mPhysical->setPosition({ mCameraSize.x / 2.f, mPhysical->getPosition().y });
+		}
 		pos.x = mCameraSize.x / 16.f;
 	}
 
+	mPhysical->setVelocity({ curX + (mTargetX - curX) * dt * 2, 0 });
 	mCameraPos += (pos - CAMERA_OFFSET - mCameraPos) * (dt * 2.5f);
 	mTime += dt;
 
@@ -144,7 +150,12 @@ void Player::draw(sf::RenderTarget& target)
     		segment.scale(0.4f, 1);
 
 		target.draw(segment);
-		segment.move(xDir * std::sin(i / (3.f + mExcitement) + mTime * (2.5f + mExcitement)*-1) + yDir * 5.f);
+		segment.move(
+		    mPhysical->getVelocity() / -500.f +
+		    xDir * std::sin(i / (3.f + mExcitement) +
+		    mTime * (2.5f + mExcitement)*-1) +
+		    yDir * 5.f
+		);
 
 		segment.scale(0.93f, 1);
     }

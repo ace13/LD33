@@ -7,6 +7,8 @@
 #include <Kunlaboro/EntitySystem.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+const float Engine::TICK_RATE = 1.f / 60.f;
+
 int main(int argc, char** argv)
 {
 	bool fullscreen = false;
