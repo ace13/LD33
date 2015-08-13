@@ -1,6 +1,7 @@
 #pragma once
-
 #define _USE_MATH_DEFINES
+
+#include <Kunlaboro/Component.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -21,6 +22,12 @@ public:
 	/// Particle data
 	struct Particle
 	{
+		enum Priority : char
+		{
+			Bottommost = -127,
+			Default = 0,
+			Topmost = 127
+		} Layer;
 		float Duration,   ///< Lifetime in seconds
 		      StartScale, ///< Scale at start
 		      EndScale,   ///< Scale at end
@@ -49,25 +56,41 @@ private:
 		sf::Vector2f Position; ///< Particle position
 	};
 
+	class InternalManager : public Kunlaboro::Component
+	{
+	public:
+		InternalManager();
+		void addedToEntity();
+
+		void update(float dt);
+		void draw(sf::RenderTarget& target);
+
+	private:
+		ParticleManager::Particle::Priority mLayer;
+		sf::Texture* mTexture;
+		std::list<InternalParticle> mParticles;
+
+		friend class ParticleManager;
+	};
+
 	ParticleManager();
 	ParticleManager(ParticleManager&&);
 
 	ParticleManager(const ParticleManager&) = delete;
 	ParticleManager& operator=(const ParticleManager&) = delete;
 
-	void update(float dt);
-	void draw(sf::RenderTarget& target);
-
-	std::list<InternalParticle> mParticles;
 	sf::Texture mTexture;
+	Particle::Priority mNextLayer;
+	std::list<InternalManager*> mParticles;
 
 	friend class Engine;
+	friend class InternalManager;
 };
 
 namespace Particles
 {
 	const ParticleManager::Particle CloudPuff{
-		10.f, 2.f, 1.75f, ParticleManager::ANGLE_RANDOM, 0.1f,
+		ParticleManager::Particle::Topmost, 10.f, 2.f, 1.75f, ParticleManager::ANGLE_RANDOM, 0.1f,
 		{ 0, 500 }, { 0, 0 },
 		{ 128, 128, 128, 129 },
 		{ 179, 179, 179, 129 },

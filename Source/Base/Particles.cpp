@@ -1,4 +1,5 @@
 #include "Particles.hpp"
+#include "Engine.hpp"
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -14,7 +15,7 @@ ParticleManager::ParticleManager()
 
 }
 ParticleManager::ParticleManager(ParticleManager&& other) :
-	mParticles(std::move(other.mParticles)), mTexture(std::move(other.mTexture))
+	mTexture(std::move(other.mTexture)), mNextLayer(Particle::Bottommost), mParticles(std::move(other.mParticles))
 {
 }
 
@@ -41,11 +42,14 @@ void ParticleManager::addParticle(const Particle& p, const sf::Vector2f& positio
 		ip.Angle = rot(dev);
 	}
 
-	mParticles.push_back(std::move(ip));
+	for (auto& m : mParticles)
+		if (m->mLayer == ip.Layer)
+			m->mParticles.push_back(std::move(ip));
 }
 void ParticleManager::clearParticles()
 {
-	mParticles.clear();
+	for (auto& m : mParticles)
+		m->mParticles.clear();
 }
 
 ParticleManager::InternalParticle::InternalParticle(const Particle& p) :
@@ -54,7 +58,36 @@ ParticleManager::InternalParticle::InternalParticle(const Particle& p) :
 	(Particle&)*this = p;
 }
 
-void ParticleManager::update(float dt)
+ParticleManager::InternalManager::InternalManager() : Kunlaboro::Component("LD33.Engine.ParticleManager")
+{
+
+}
+
+void ParticleManager::InternalManager::addedToEntity()
+{
+	auto& man = Engine::get<ParticleManager>();
+
+	mTexture = &man.mTexture;
+	mLayer = man.mNextLayer;
+	switch (mLayer)
+	{
+	case ParticleManager::Particle::Bottommost: man.mNextLayer = ParticleManager::Particle::Default; break;
+	case ParticleManager::Particle::Default: man.mNextLayer = ParticleManager::Particle::Topmost; break;
+	default: break;
+	}
+
+	requestMessage("LD33.Update", [this](const Kunlaboro::Message& msg) {
+		update(msg.payload.get<float>());
+	});
+	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) {
+		draw(*msg.payload.get<sf::RenderTarget*>());
+	});
+	changeRequestPriority("LD33.Draw", float(mLayer));
+
+	man.mParticles.push_back(this);
+}
+
+void ParticleManager::InternalManager::update(float dt)
 {
 	for (auto it = mParticles.begin(); it != mParticles.end();)
 	{
@@ -82,7 +115,7 @@ void ParticleManager::update(float dt)
 	}
 }
 
-void ParticleManager::draw(sf::RenderTarget& target)
+void ParticleManager::InternalManager::draw(sf::RenderTarget& target)
 {
 	sf::VertexArray vex(sf::Quads, mParticles.size() * 4);
 
@@ -112,6 +145,6 @@ void ParticleManager::draw(sf::RenderTarget& target)
 			{ p.Rect.left, p.Rect.top + p.Rect.height } });
 	}
 
-	sf::RenderStates states{ &mTexture };
+	sf::RenderStates states{ mTexture };
 	target.draw(vex, states);
 }

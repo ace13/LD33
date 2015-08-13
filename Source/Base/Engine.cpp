@@ -51,6 +51,11 @@ Engine::~Engine()
 void Engine::setSystem(Kunlaboro::EntitySystem& sys)
 {
 	mSystem = &sys;
+
+	sys.registerComponent<ParticleManager::InternalManager>("LD33.Engine.ParticleManager");
+	sys.registerTemplate("LD33.Engine.ParticleManager", {
+		"LD33.Engine.ParticleManager", "LD33.Engine.ParticleManager", "LD33.Engine.ParticleManager"
+	});
 }
 void Engine::setWindow(sf::RenderWindow& window)
 {
@@ -61,6 +66,8 @@ void Engine::run()
 {
 	if (!mWindow || !mSystem)
 		throw std::runtime_error("Missing window or entity system");
+
+	mSystem->createEntity("LD33.Engine.ParticleManager");
 
 	auto frame = std::chrono::high_resolution_clock::now(),
 	     lastFrame = frame;
@@ -136,7 +143,6 @@ void Engine::run()
 		}
 
 		{ PROFILE_BLOCK("Update");
-			sParticles->update(dtFloat);
 			mSystem->sendGlobalMessage("LD33.Update", dtFloat);
 		}
 
@@ -146,7 +152,6 @@ void Engine::run()
 			{ PROFILE_BLOCK("Game");
 				mWindow->setView(gameView);
 				mSystem->sendGlobalMessage("LD33.Draw", (sf::RenderTarget*)mWindow);
-				sParticles->draw(*mWindow);
 				gameView = mWindow->getView();
 			}
 
@@ -207,4 +212,6 @@ template<>
 sf::RenderWindow& Engine::get() { return *sEngine->mWindow; }
 template<>
 sf::RenderTarget& Engine::get() { return *sEngine->mWindow; }
+template<>
+Kunlaboro::EntitySystem& Engine::get() { return *sEngine->mSystem; }
 
