@@ -23,9 +23,6 @@ namespace {
 	ParticleManager* sParticles = nullptr;
 }
 
-
-const float Engine::TICK_RATE = 1.f / 60.f;
-
 Engine::Engine() :
 	mWindow(nullptr)
 {

@@ -6,6 +6,7 @@ namespace sf { class RenderWindow; }
 class Engine
 {
 public:
+	/// The game needs to implement this constant
 	static const float TICK_RATE;
 
 	Engine();
