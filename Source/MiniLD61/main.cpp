@@ -35,6 +35,7 @@ int main(int argc, char** argv)
 	inp.setBind(Bind_Right, { InputManager::Bind::KeyboardKey, sf::Keyboard::D });
 	inp.setBind(Bind_Up, { InputManager::Bind::KeyboardKey, sf::Keyboard::W });
 	inp.setBind(Bind_Down, { InputManager::Bind::KeyboardKey, sf::Keyboard::S });
+	inp.setBind(Bind_Fire, { InputManager::Bind::KeyboardKey, sf::Keyboard::LShift });
 
 	inp.linkBinds(Bind_Horizontal, Bind_Left, Bind_Right);
 	inp.linkBinds(Bind_Vertical, Bind_Up, Bind_Down);

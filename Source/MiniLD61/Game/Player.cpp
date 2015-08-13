@@ -4,6 +4,7 @@
 
 #include <Base/Engine.hpp>
 #include <Base/Input.hpp>
+#include <Base/Particles.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -41,55 +42,10 @@ void Player::addedToEntity()
 		auto& target = *msg.payload.get<sf::RenderTarget*>();
 		drawUI(target);
 	});
-	requestMessage("LD33.Event", [this](const Kunlaboro::Message& msg){
-		auto ev = msg.payload.get<sf::Event*>();
-		event(*ev);
-	});
 	requestMessage("LD33.Update", [this](const Kunlaboro::Message& msg){
 		float dt = msg.payload.get<float>();
 		update(dt);
 	});
-}
-
-void Player::event(sf::Event& ev)
-{
-/*	if (ev.type == sf::Event::KeyPressed)
-	{
-		switch (ev.key.code)
-		{
-		case sf::Keyboard::A:
-		case sf::Keyboard::Left:
-			mTargetX = -950; break;
-		case sf::Keyboard::D:
-		case sf::Keyboard::Right:
-			mTargetX = 950; break;
-
-		case sf::Keyboard::Num1:
-			mExcitement = 0; break;
-		case sf::Keyboard::Num2:
-			mExcitement = 1; break;
-		case sf::Keyboard::Num3:
-			mExcitement = 2; break;
-
-		default:
-			break;
-		}
-	}
-	else if (ev.type == sf::Event::KeyReleased)
-	{
-		switch (ev.key.code)
-		{
-		case sf::Keyboard::A:
-		case sf::Keyboard::Left:
-		case sf::Keyboard::D:
-		case sf::Keyboard::Right:
-			mTargetX = 0; break;
-
-		default:
-			break;
-		}
-	}
-*/
 }
 
 void Player::update(float dt)
@@ -116,6 +72,21 @@ void Player::update(float dt)
 
 	mCameraPos += (pos - CAMERA_OFFSET - mCameraPos) * (dt * 2.5f);
 	mTime += dt;
+
+	if (Engine::get<InputManager>().getValue(Bind_Fire) > 0.5f)
+	{
+		auto p = Particles::CloudPuff;
+
+		p.Duration = 0.5f + (rand()%50 - 25) / 100.f;
+		p.StartScale = 0.1f;
+		p.EndScale = 0.25f;
+		p.StartColor = { 255, 200, 25 };
+		p.EndColor = { 120, 5, 0 };
+		p.Velocity = mPhysical->getVelocity() + sf::Vector2f{ 100 - (rand()%200), -1000 };
+		p.Gravity = { (rand() % 100) - 50, 1000 + (rand() % 1000) };
+
+		Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + sf::Vector2f{ 0, -125 });
+	}
 }
 
 void Player::draw(sf::RenderTarget& target)
