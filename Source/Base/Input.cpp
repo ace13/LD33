@@ -1,4 +1,7 @@
 #include "Input.hpp"
+#include "Engine.hpp"
+
+#include <SFML/Window/Window.hpp>
 
 #include <cassert>
 
@@ -40,16 +43,24 @@ void InputManager::linkBinds(unsigned int id, unsigned int lower, unsigned int u
 
 float InputManager::getValue(unsigned int bind) const
 {
-	///\TODO: if (notInFocus) return 0;
-	return mBinds.at(bind).getValue();
+	if (Engine::get<sf::Window>().hasFocus())
+		return mBinds.at(bind).getValue();
+	return 0;
 }
 
 void InputManager::handleEvent(sf::Event& ev)
 {
 	if (!(ev.type == sf::Event::KeyPressed || ev.type == sf::Event::KeyReleased ||
 	    ev.type == sf::Event::JoystickButtonPressed || ev.type == sf::Event::JoystickButtonReleased ||
-	    ev.type == sf::Event::JoystickMoved))
+	    ev.type == sf::Event::JoystickMoved || ev.type == sf::Event::LostFocus))
 		return;
+
+	if (ev.type == sf::Event::LostFocus)
+	{
+		for (auto& it : mBinds)
+			it.second.Value = 0;
+		return;
+	}
 
 	for (auto& it : mBinds)
 	{

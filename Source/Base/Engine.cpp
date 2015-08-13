@@ -204,3 +204,10 @@ Engine& Engine::get()
 	return *sEngine;
 }
 
+template<>
+sf::Window& Engine::get() { return *sEngine->mWindow; }
+template<>
+sf::RenderWindow& Engine::get() { return *sEngine->mWindow; }
+template<>
+sf::RenderTarget& Engine::get() { return *sEngine->mWindow; }
+
