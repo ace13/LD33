@@ -25,7 +25,7 @@ void Player::addedToEntity()
 		auto comp = dynamic_cast<Physical*>(msg.sender);
 
 		// We want the player to look good,
-		// so let's run his updates every frame.
+		// so let's run his physics updates every frame.
 		comp->unrequestMessage("LD33.Tick");
 		comp->requestMessage("LD33.Update", [comp](const Kunlaboro::Message& msg){
 			comp->tick(msg.payload.get<float>());
@@ -77,15 +77,22 @@ void Player::update(float dt)
 	{
 		auto p = Particles::CloudPuff;
 
-		p.Duration = 0.5f + (rand()%50 - 25) / 100.f;
-		p.StartScale = 0.1f;
+		float rads = mPhysical->getVelocity().x * float(M_PI) / 18000.f;
+		sf::Vector2f yDir{
+			std::cos(rads + float(M_PI_2)), std::sin(rads + float(M_PI_2))
+		};
+
+		//\TODO: Fix the random in this
+
+		p.Duration = 0.5f + float(rand()%50 - 25) / 100.f;
+		p.StartScale = 0.05f;
 		p.EndScale = 0.25f;
 		p.StartColor = { 255, 200, 25 };
 		p.EndColor = { 120, 5, 0 };
-		p.Velocity = mPhysical->getVelocity() + sf::Vector2f{ 100 - (rand()%200), -1000 };
-		p.Gravity = { (rand() % 100) - 50, 1000 + (rand() % 1000) };
+		p.Velocity = mPhysical->getVelocity() + sf::Vector2f{ 100 - float(rand()%200), -1000 };
+		p.Gravity = { float(rand() % 100) - 50, 1000 + float(rand() % 1000) };
 
-		Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + sf::Vector2f{ 0, -125 });
+		Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + (-120.f * yDir));
 	}
 }
 
