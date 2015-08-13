@@ -80,8 +80,11 @@ void Player::update(float dt)
 	mCameraPos += (pos - CAMERA_OFFSET - mCameraPos) * (dt * 2.5f);
 	mTime += dt;
 
+	float targetExcitmenet = 1;
+
 	if (Engine::get<InputManager>().getValue(Bind_Fire) > 0.5f)
 	{
+		targetExcitmenet = 3;
 		auto p = Particles::CloudPuff;
 
 		float rads = mPhysical->getVelocity().x * float(M_PI) / 18000.f;
@@ -102,6 +105,9 @@ void Player::update(float dt)
 
 		Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + (-115.f * yDir));
 	}
+
+	mExcitement += (targetExcitmenet - mExcitement) * dt;
+	mTailTime += dt * mExcitement * 2;
 }
 
 void Player::draw(sf::RenderTarget& target)
@@ -154,8 +160,8 @@ void Player::draw(sf::RenderTarget& target)
 		target.draw(segment);
 		segment.move(
 		    mPhysical->getVelocity() / -500.f +
-		    xDir * std::sin(i / (3.f + mExcitement) +
-		    mTime * (2.5f + mExcitement)*-1) +
+		    xDir * std::sin(i / (3.f + mExcitement) -
+		    mTailTime) +
 		    yDir * 5.f
 		);
 
