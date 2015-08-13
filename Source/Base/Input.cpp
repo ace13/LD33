@@ -104,7 +104,7 @@ void InputManager::handleEvent(sf::Event& ev)
 }
 
 InputManager::InternalBind::InternalBind(Bind&& bind) :
-	IBind(bind), Value(0)
+	IBind(bind), Value(0), linkBind(nullptr), upperBind(nullptr), lowerBind(nullptr)
 {
 }
 float InputManager::InternalBind::getValue() const

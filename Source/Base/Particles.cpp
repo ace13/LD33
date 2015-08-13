@@ -70,7 +70,7 @@ void ParticleManager::update(float dt)
 			sf::Uint8(p.StartColor.a + perc * (p.EndColor.a - p.StartColor.a))
 		};
 
-		p.Velocity += p.Gravity * dt * dt;
+		p.Velocity += p.Gravity * dt;
 		p.Position += p.Velocity * dt;
 		p.Angle    += p.Rotation * dt;
 		p.Scale     = p.StartScale + perc * (p.EndScale - p.StartScale);
