@@ -38,6 +38,7 @@ void Player::addedToEntity()
 		auto& target = *msg.payload.get<sf::RenderTarget*>();
 		draw(target);
 	});
+	changeRequestPriority("LD33.Draw", 1);
 	requestMessage("LD33.DrawUI", [this](const Kunlaboro::Message& msg){
 		auto& target = *msg.payload.get<sf::RenderTarget*>();
 		drawUI(target);
@@ -90,6 +91,7 @@ void Player::update(float dt)
 
 		//\TODO: Fix the random in this
 
+ 		p.Layer = ParticleManager::Particle::Default;
 		p.Duration = 0.5f + float(rand()%50 - 25) / 100.f;
 		p.StartScale = 0.05f;
 		p.EndScale = 0.25f;
@@ -98,7 +100,7 @@ void Player::update(float dt)
 		p.Velocity = mPhysical->getVelocity() + sf::Vector2f{ 100 - float(rand()%200), -1000 };
 		p.Gravity = { float(rand() % 100) - 50, 1000 + float(rand() % 1000) };
 
-		Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + (-120.f * yDir));
+		Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + (-115.f * yDir));
 	}
 }
 

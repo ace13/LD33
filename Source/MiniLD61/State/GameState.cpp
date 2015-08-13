@@ -26,6 +26,7 @@ void GameState::addedToEntity()
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg){
 		draw(*msg.payload.get<sf::RenderTarget*>());
 	});
+	changeRequestPriority("LD33.Draw", -129);
 }
 
 void GameState::event(sf::Event& ev)
