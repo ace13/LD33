@@ -1,5 +1,6 @@
 #include "Player.hpp"
 #include "Components.hpp"
+#include "Particles.hpp"
 #include "../Binds.hpp"
 
 #include <Base/Engine.hpp>
@@ -10,6 +11,8 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Window/Event.hpp>
+
+#include <random>
 
 Player::Player() : Kunlaboro::Component("Game.Player"),
 	mFirst(true), mTime(0), mTargetX(0), mExcitement(0), mPhysical(nullptr)
@@ -85,25 +88,32 @@ void Player::update(float dt)
 	if (Engine::get<InputManager>().getValue(Bind_Fire) > 0.5f)
 	{
 		targetExcitmenet = 3;
-		auto p = Particles::CloudPuff;
+		auto p = Particles::FirePuff;
 
 		float rads = mPhysical->getVelocity().x * float(M_PI) / 18000.f;
 		sf::Vector2f yDir{
 			std::cos(rads + float(M_PI_2)), std::sin(rads + float(M_PI_2))
 		};
 
-		//\TODO: Fix the random in this
+		std::random_device dev;
+		std::uniform_real_distribution<float> rand(-100, 100);
 
- 		p.Layer = ParticleManager::Particle::Default;
-		p.Duration = 0.5f + float(rand()%50 - 25) / 100.f;
-		p.StartScale = 0.05f;
-		p.EndScale = 0.25f;
-		p.StartColor = { 255, 200, 25 };
-		p.EndColor = { 120, 5, 0 };
-		p.Velocity = mPhysical->getVelocity() + sf::Vector2f{ 100 - float(rand()%200), -1000 };
-		p.Gravity = { float(rand() % 100) - 50, 1000 + float(rand() % 1000) };
+		p.Duration += rand(dev) / 400.f;
+		p.Velocity += mPhysical->getVelocity() + sf::Vector2f{ rand(dev), 0 };
+		p.Gravity  += { rand(dev) / 2.f, rand(dev) * 5 };
 
 		Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + (-115.f * yDir));
+
+		if (rand(dev) > 50)
+		{
+			p = Particles::FireSmoke;
+
+			p.Duration += rand(dev) / 400.f;
+			p.Velocity += mPhysical->getVelocity() + sf::Vector2f{ rand(dev), 0 };
+			p.Gravity  += { rand(dev) / 2.f, rand(dev) * 5 };
+
+			Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + (-115.f * yDir));
+		}
 	}
 
 	mExcitement += (targetExcitmenet - mExcitement) * dt;
