@@ -54,7 +54,7 @@ void Player::addedToEntity()
 
 void Player::update(float dt)
 {
-	mTargetX = Engine::get<InputManager>().getValue(Bind_Horizontal) * 950;
+	mTargetX = Engine::get<InputManager>().getValue(Bind_Horizontal) * 1250;
 	const sf::Vector2f CAMERA_OFFSET{ 0, 950 };
 
 	float curX = mPhysical->getVelocity().x;
@@ -64,7 +64,7 @@ void Player::update(float dt)
 	{
 		if (pos.x < mCameraSize.x / -2.f)
 		{
-			mTargetX = 500;
+			mTargetX = 1500;
 			mPhysical->setPosition({ mCameraSize.x / -2.f, mPhysical->getPosition().y });
 		}
 		pos.x = mCameraSize.x / -16.f;
@@ -73,7 +73,7 @@ void Player::update(float dt)
 	{
 		if (pos.x > mCameraSize.x / 2.f)
 		{
-			mTargetX = -500;
+			mTargetX = -1500;
 			mPhysical->setPosition({ mCameraSize.x / 2.f, mPhysical->getPosition().y });
 		}
 		pos.x = mCameraSize.x / 16.f;
