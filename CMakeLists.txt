@@ -52,6 +52,7 @@ ENDFOREACH ()
 
 IF (WIN32)
 	FIND_PACKAGE(SFML 2 REQUIRED COMPONENTS audio graphics main system window)
+	ADD_DEFINITIONS(-D_USE_MATH_DEFINES) # Stupid MSVC standard libraries
 ELSE ()
 	FIND_PACKAGE(SFML 2 REQUIRED COMPONENTS audio graphics system window)
 ENDIF ()

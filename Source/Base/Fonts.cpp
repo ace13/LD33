@@ -5,6 +5,7 @@
 #elif defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <sstream>
 #else
 #error "No way to find fonts on your system, that might be a problem."
 #endif
@@ -57,7 +58,7 @@ namespace
 		if (os) FcObjectSetDestroy(os);
 		if (pat) FcPatternDestroy(pat);
 #elif defined(_WIN32)
-		static const LPWSTR fontRegistryPath = L"Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts";
+		static const LPCSTR fontRegistryPath = "Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts";
 		HKEY hKey;
 		LONG result;
 		std::wstring wsFaceName(family.begin(), family.end());
@@ -76,10 +77,10 @@ namespace
         }
 
         DWORD valueIndex = 0;
-        LPWSTR valueName = new WCHAR[maxValueNameSize];
+        LPSTR valueName = new CHAR[maxValueNameSize];
         LPBYTE valueData = new BYTE[maxValueDataSize];
         DWORD valueNameSize, valueDataSize, valueType;
-        std::wstring wsFontFile;
+        std::string wsFontFile;
 
         // Look for a matching font name
         do {
@@ -95,14 +96,14 @@ namespace
                 continue;
             }
 
-            std::wstring wsValueName(valueName, valueNameSize);
+            std::string wsValueName(valueName, valueNameSize);
 
             // Found a match
-			wsFontFile.assign((LPWSTR)valueData, valueDataSize);
-			WCHAR winDir[MAX_PATH];
+			wsFontFile.assign((LPSTR)valueData, valueDataSize);
+			CHAR winDir[MAX_PATH];
 			GetWindowsDirectory(winDir, MAX_PATH);
 
-			std::wstringstream ss;
+			std::stringstream ss;
 			ss << winDir << "\\Fonts\\" << wsFontFile;
 
 			if (font.loadFromFile(ss.str()))

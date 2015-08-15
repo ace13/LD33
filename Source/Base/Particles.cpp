@@ -39,7 +39,7 @@ void ParticleManager::addParticle(const Particle& p, const sf::Vector2f& positio
 	if (ip.Angle == ANGLE_RANDOM)
 	{
 		std::random_device dev;
-		std::uniform_real_distribution<float> rot(-M_PI, M_PI);
+		std::uniform_real_distribution<float> rot(float(-M_PI), float(M_PI));
 
 		ip.Angle = rot(dev);
 	}
@@ -87,7 +87,7 @@ void ParticleManager::InternalManager::addedToEntity()
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) {
 		draw(*msg.payload.get<sf::RenderTarget*>());
 	});
-	changeRequestPriority("LD33.Draw", float(mLayer));
+	changeRequestPriority("LD33.Draw", int(mLayer));
 
 	man.mParticles.push_back(this);
 }
