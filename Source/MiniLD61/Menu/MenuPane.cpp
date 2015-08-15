@@ -6,11 +6,8 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
-<<<<<<< Updated upstream
-=======
 #include <cstdint>
 
->>>>>>> Stashed changes
 const uint8_t SHADED_ALPHA = 24;
 const float SHADED_OFFSET  = -32;
 const uint8_t OPENED_ALPHA = 255;
@@ -33,11 +30,7 @@ void MenuPane::draw(sf::RenderTarget& target)
 
 	title.setOrigin(0, 15);
 	title.setPosition(getOffset(), 64);
-<<<<<<< Updated upstream
-	title.setColor(sf::Color(255,255,255,getAlpha()));
-=======
 	title.setColor({ 255, 255, 255, uint8_t(getAlpha()) });
->>>>>>> Stashed changes
 
 	target.draw(title);
 }

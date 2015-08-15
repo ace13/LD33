@@ -2,11 +2,7 @@
 
 #include <Kunlaboro/Component.hpp>
 
-<<<<<<< Updated upstream
-namespace sf { struct Event; class RenderTarget; }
-=======
 namespace sf { class Event; class RenderTarget; }
->>>>>>> Stashed changes
 
 class GameState : public Kunlaboro::Component
 {
