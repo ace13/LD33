@@ -171,9 +171,9 @@ void Profiler::Node::toStream(std::ostream& os, unsigned int level) const
 
 	if (level > 0 && mParent && mParent != &ProfilingRoot)
 	{
-		float perc = mTotalTime / mParent->mTotalTime;
+		float perc = (mTotalTime.count() / float(mParent->mTotalTime.count()));
 		if (perc > 0.05)
-			os << " (" << std::setprecision(2) << "%)";
+			os << " (" << std::setprecision(2) << (perc * 100) << "%)";
 	}
 
 	if (mChild)
