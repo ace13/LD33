@@ -72,14 +72,23 @@ void GameState::addCloud()
     for (int i = 0; i < j; ++i)
     {
         auto p = Particles::CloudPuff;
+<<<<<<< Updated upstream
         p.Angle = dist(rd) * M_PI;
+=======
+        p.Angle = dist(rd) * float(M_PI);
+>>>>>>> Stashed changes
         p.Rotation = dist(rd) * 0.05f;
         p.StartScale = 1.75f + dist(rd) * 0.75f;
         p.EndScale = 1.75f + dist(rd) * 0.75f;
 
         int t = type(rd);
+<<<<<<< Updated upstream
         p.Rect.top = 100 + (t / 2) * 200;
         p.Rect.left = 100 + (t % 2) * 200;
+=======
+        p.Rect.top = float(100 + int(t / 2) * 200);
+        p.Rect.left = float(100 + (t % 2) * 200);
+>>>>>>> Stashed changes
 
         uint8_t col = color(rd);
         p.StartColor = sf::Color(col,col,col,79);

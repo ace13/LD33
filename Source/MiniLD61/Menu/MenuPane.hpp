@@ -6,7 +6,11 @@
 
 namespace sf
 {
+<<<<<<< Updated upstream
 	struct Event;
+=======
+	class Event;
+>>>>>>> Stashed changes
 	class RenderTarget;
 }
 

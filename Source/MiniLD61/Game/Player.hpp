@@ -6,7 +6,11 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
 
+<<<<<<< Updated upstream
 namespace sf { struct Event; class RenderTarget; }
+=======
+namespace sf { class Event; class RenderTarget; }
+>>>>>>> Stashed changes
 
 class Player : public Kunlaboro::Component
 {

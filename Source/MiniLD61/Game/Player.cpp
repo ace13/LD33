@@ -15,7 +15,11 @@
 #include <random>
 
 Player::Player() : Kunlaboro::Component("Game.Player"),
+<<<<<<< Updated upstream
 	mFirst(true), mTime(0), mTargetX(0), mExcitement(0), mPhysical(nullptr)
+=======
+	mFirst(true), mTime(0), mTailTime(0), mTargetX(0), mExcitement(0), mPhysical(nullptr)
+>>>>>>> Stashed changes
 {
 	mPlayerWingTex.loadFromFile("Resources/PlayerAnim.png");
 	mPlayerTex.loadFromFile("Resources/Player.png");
@@ -100,7 +104,11 @@ void Player::update(float dt)
 
 		p.Duration += rand(dev) / 400.f;
 		p.Velocity += mPhysical->getVelocity() + sf::Vector2f{ rand(dev), 0 };
+<<<<<<< Updated upstream
 		p.Gravity  += { rand(dev) / 2.f, rand(dev) * 5 };
+=======
+		p.Gravity  += sf::Vector2f{ rand(dev) / 2.f, rand(dev) * 5 };
+>>>>>>> Stashed changes
 
 		Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + (-115.f * yDir));
 
@@ -110,7 +118,11 @@ void Player::update(float dt)
 
 			p.Duration += rand(dev) / 400.f;
 			p.Velocity += mPhysical->getVelocity() + sf::Vector2f{ rand(dev), 0 };
+<<<<<<< Updated upstream
 			p.Gravity  += { rand(dev) / 2.f, rand(dev) * 5 };
+=======
+			p.Gravity  += sf::Vector2f{ rand(dev) / 2.f, rand(dev) * 5 };
+>>>>>>> Stashed changes
 
 			Engine::get<ParticleManager>().addParticle(p, mPhysical->getPosition() + (-115.f * yDir));
 		}
@@ -151,7 +163,11 @@ void Player::draw(sf::RenderTarget& target)
 	segment.setRotation(player.getRotation());
 	segment.setFillColor(sf::Color::Black);
 
+<<<<<<< Updated upstream
 	float rads = player.getRotation() * M_PI/180.f;
+=======
+	float rads = player.getRotation() * float(M_PI)/180.f;
+>>>>>>> Stashed changes
 	sf::Vector2f xDir{
 		std::cos(rads), std::sin(rads)
 	}, yDir{
