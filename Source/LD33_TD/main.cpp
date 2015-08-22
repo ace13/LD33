@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 	Kunlaboro::EntitySystem sys;
 	sf::RenderWindow win;
 
-
+	RegisterComponents(sys);
 
 	eng.setSystem(sys);
 	eng.setWindow(win);
