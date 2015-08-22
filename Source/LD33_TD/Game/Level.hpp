@@ -22,6 +22,7 @@ public:
 	};
 
 	Level();
+	~Level();
 
 	void addedToEntity();
 	
@@ -40,5 +41,5 @@ private:
 	std::vector<Tile> mTiles;
 	sf::Texture mTilesTexture;
 	bool mRebuildPath;
-	Path mBestPath;
+	Path* mBestPath;
 };

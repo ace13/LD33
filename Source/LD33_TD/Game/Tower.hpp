@@ -3,6 +3,7 @@
 #include <Kunlaboro/Component.hpp>
 #include "Towers/Basic.hpp"
 
+class Enemy;
 namespace Game { struct Physical; }
 namespace sf { class RenderTarget; }
 
@@ -22,6 +23,7 @@ protected:
 private:
 	TowerDefinition* mDefinition;
 	Game::Physical* mPhysical;
+	Enemy* mTarget;
 
 	float mXP, mCooldown;
 	unsigned int mLevel;

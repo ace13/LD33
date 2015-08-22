@@ -18,6 +18,8 @@ public:
 
 	void damage(float dmg);
 
+	bool isAlive() const;
+
 private:
 	float mStrength, mHealth;
 	Game::Physical* mPhysical;

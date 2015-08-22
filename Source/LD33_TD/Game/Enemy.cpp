@@ -1,9 +1,12 @@
 #include "Enemy.hpp"
 #include "Components.hpp"
+#include <Base/Profiling.hpp>
 #include <Base/VectorMath.hpp>
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+
+#include <algorithm>
 
 Enemy::Enemy() : Kunlaboro::Component("Game.Enemy"),
 	mStrength(0), mHealth(1)
@@ -14,13 +17,39 @@ Enemy::Enemy() : Kunlaboro::Component("Game.Enemy"),
 void Enemy::addedToEntity()
 {
 	requestMessage("LD33.Tick", [this](const Kunlaboro::Message& msg) { tick(msg.payload.get<float>()); });
-	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
+	changeRequestPriority("LD33.Tick", 9001); // Tick enemies last
 
+	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
 	changeRequestPriority("LD33.Draw", 1);
 
 	requestMessage("Level.PathRebuilt", [this](const Kunlaboro::Message& msg) {
+		auto oldPos = *mPathIter;
+
 		mPath = msg.payload.get<Path*>();
 		mPathIter = mPath->begin();
+
+		auto it = std::find(mPath->begin(), mPath->end(), oldPos);
+		if (it != mPath->end())
+			mPathIter = it;
+		else
+		{
+			float shortest = FLT_MAX;
+			auto it = mPath->begin();
+			for (; it != mPath->end(); ++it)
+			{
+				auto resp = sendGlobalQuestion("Level.HexToCoords", *it);
+				float dist = VMath::Distance(mPhysical->Position, resp.payload.get<sf::Vector2f>());
+
+				if (dist < shortest)
+				{
+					shortest = dist;
+					mPathIter = it;
+				}
+			}
+
+			if (it != mPath->end())
+				it++;
+		}
 	});
 
 	requireComponent("Game.Physical", [this](const Kunlaboro::Message& msg) {
@@ -42,14 +71,16 @@ void Enemy::addedToEntity()
 void Enemy::damage(float dmg)
 {
 	mHealth -= dmg;
+}
 
-	if (mHealth <= 0)
-		getEntitySystem()->destroyEntity(getOwnerId());
+bool Enemy::isAlive() const
+{
+	return mHealth > 0;
 }
 
 void Enemy::tick(float dt)
-{
-	if (mPathIter == mPath->end())
+{ PROFILE;
+	if (mPathIter == mPath->end() || mHealth <= 0)
 	{
 		getEntitySystem()->destroyEntity(getOwnerId());
 		return;
@@ -67,7 +98,7 @@ void Enemy::tick(float dt)
 void Enemy::draw(sf::RenderTarget& target)
 {
 	sf::CircleShape circ(mPhysical->Radius);
-	circ.setFillColor(sf::Color::Red);
+	circ.setFillColor({ sf::Uint8(mHealth * 255), 0, 0 });
 
 	circ.setOrigin(mPhysical->Radius, mPhysical->Radius);
 	circ.setPosition(mPhysical->Position);

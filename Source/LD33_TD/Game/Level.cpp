@@ -30,7 +30,7 @@ const size_t LevelWidth = 12;
 const size_t LevelHeight = 12;
 
 Level::Level() : Kunlaboro::Component("Game.Level"),
-	pickedX(0), pickedY(0), mRebuildPath(true)
+	pickedX(0), pickedY(0), mRebuildPath(true), mBestPath(new Path(Path::Invalid))
 {
 	mTilesTexture.loadFromFile("Resources/Tiles.png");
 
@@ -50,15 +50,24 @@ Level::Level() : Kunlaboro::Component("Game.Level"),
 	};
 }
 
+Level::~Level()
+{
+	if (mBestPath)
+		delete mBestPath;
+}
 
 void Level::addedToEntity()
 {
 	requestMessage("LD33.Tick", [this](const Kunlaboro::Message& msg) {
 		if (mRebuildPath) {
-			mBestPath = findPath({ 1, 10 }, { 8, 10 });
+			auto newPath = new Path(findPath({ 1, 10 }, { 8, 10 }));
 			mRebuildPath = false;
 
-			sendGlobalMessage("Level.PathRebuilt", &mBestPath);
+			sendGlobalMessage("Level.PathRebuilt", newPath);
+
+			if (mBestPath)
+				delete mBestPath;
+			mBestPath = newPath;
 		}
 	});
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
@@ -70,7 +79,7 @@ void Level::addedToEntity()
 		msg.handle(coordsToHex(msg.payload.get<sf::Vector2f>()));
 	});
 	requestMessage("Level.GetPath", [this](Kunlaboro::Message& msg) {
-		msg.handle(&mBestPath);
+		msg.handle(mBestPath);
 	});
 
 	requestComponent("Game.Tower", [this](const Kunlaboro::Message&)
@@ -108,7 +117,7 @@ void Level::draw(sf::RenderTarget& target)
 		}
 	}
 
-	for (auto& it : mBestPath)
+	for (auto& it : *mBestPath)
 	{
 		drawTile(it, Tile_Picker, tiles);
 	}
