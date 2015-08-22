@@ -3,6 +3,7 @@
 #include "Tweening.hpp"
 
 #include <SFML/Audio/Sound.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
 
 #include <unordered_map>
 
@@ -16,6 +17,8 @@ public:
 	class Track
 	{
 	public:
+		Track(sf::SoundBuffer&& sound);
+		Track(Track&& t);
 		~Track();
 
 		float getVolume() const;
@@ -24,8 +27,6 @@ public:
 		void setPitch(float pitch);
 
 	private:
-		Track(sf::Sound&& sound);
-
 		Track(const Track&) = delete;
 		Track& operator=(const Track&) = delete;
 
@@ -33,12 +34,14 @@ public:
 
 		Easer mVolumeTween;
 		sf::Sound mTrack;
+		sf::SoundBuffer mBuf;
 
 		friend class MusicManager;
 	};
 
 	~MusicManager();
 
+	void addTrack(TrackID id, sf::SoundBuffer&& sound);
 	Track& operator[](TrackID);
 
 	float getGlobalVolume() const;
