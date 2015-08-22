@@ -13,8 +13,23 @@ public:
 
 	struct Bind
 	{
+		struct KeyBind {
+			sf::Keyboard::Key Code;
+		};
+		struct JoyButtonBind {
+			unsigned int Joystick;
+			unsigned int Button;
+		};
+		struct JoyAxisBind {
+			unsigned int Joystick;
+			sf::Joystick::Axis Axis;
+			bool Negative;
+		};
+
+
 		enum {
 			None,
+
 			KeyboardKey,
 			JoystickButton,
 			JoystickAxis
@@ -22,19 +37,16 @@ public:
 
 		union
 		{
-			struct {
-				sf::Keyboard::Key Code;
-			} Key;
-			struct {
-				unsigned int Joystick;
-				unsigned int Button;
-			} Button;
-			struct {
-				unsigned int Joystick;
-				sf::Joystick::Axis Axis;
-				bool Negative;
-			} Axis;
+			KeyBind Key;
+			JoyButtonBind Button;
+			JoyAxisBind Axis;
 		};
+
+		Bind() : Type(None) { }
+
+		Bind(const KeyBind& bind) : Type(KeyboardKey), Key(bind) { }
+		Bind(const JoyButtonBind& bind) : Type(JoystickButton), Button(bind) { }
+		Bind(const JoyAxisBind& bind) : Type(JoystickAxis), Axis(bind) { }
 	};
 
 	void setBind(unsigned int id, Bind&& bind);
