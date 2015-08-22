@@ -1,9 +1,10 @@
 # Finds the Kunlaboro library
 
 find_path(KUNLABORO_INCLUDE_DIR Kunlaboro/Kunlaboro.hpp)
-find_library(KUNLABORO_LIBRARY NAMES Kunlaboro)
+find_library(KUNLABORO_LIBRARY_DEBUG NAMES Kunlaborod)
+find_library(KUNLABORO_LIBRARY_RELEASE NAMES Kunlaboro)
 
-set(KUNLABORO_LIBRARIES "${KUNLABORO_LIBRARY}")
+set(KUNLABORO_LIBRARIES debug ${KUNLABORO_LIBRARY_DEBUG} optimized ${KUNLABORO_LIBRARY_RELEASE})
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Kunlaboro
