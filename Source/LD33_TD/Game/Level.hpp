@@ -15,6 +15,8 @@ public:
 		Tile_Picker = 0,
 		Tile_Water,
 		Tile_Grass,
+		Tile_Mountain,
+		Tile_Forest,
 	};
 
 	Level();
