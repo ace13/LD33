@@ -1,4 +1,5 @@
 #include "Particles.hpp"
+#include "Profiling.hpp"
 #include "Engine.hpp"
 
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -93,7 +94,7 @@ void ParticleManager::InternalManager::addedToEntity()
 }
 
 void ParticleManager::InternalManager::update(float dt)
-{
+{ PROFILE_BLOCK("Particle::Update")
 	for (auto it = mParticles.begin(); it != mParticles.end();)
 	{
 		auto& p = *it;
@@ -121,7 +122,7 @@ void ParticleManager::InternalManager::update(float dt)
 }
 
 void ParticleManager::InternalManager::draw(sf::RenderTarget& target)
-{
+{ PROFILE_BLOCK("Particle::Draw")
 	sf::VertexArray vex(sf::Quads, mParticles.size() * 4);
 
 	for (auto& p : mParticles)

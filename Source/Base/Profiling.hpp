@@ -10,9 +10,9 @@
 
 #define __PROFILE_COMBINE2(VAR1,VAR2) VAR1 ## VAR2
 #define __PROFILE_COMBINE1(VAR1,VAR2) __PROFILE_COMBINE2(VAR1,VAR2)
-#define PROFILE ::Profiler::Block __PROFILE_COMBINE1(__prof_, __LINE__)(__FUNCTION__)
-#define PROFILE_BLOCK(NAME) ::Profiler::Block __PROFILE_COMBINE1(__prof_, __LINE__)(NAME)
-#define PROFILE_CALL(NAME, CALL) ::Profiler::startBlock(NAME); CALL; ::Profiler::endBlock()
+#define PROFILE ::Profiler::Block __PROFILE_COMBINE1(__prof_, __LINE__)(__FUNCTION__);
+#define PROFILE_BLOCK(NAME) ::Profiler::Block __PROFILE_COMBINE1(__prof_, __LINE__)(NAME);
+#define PROFILE_CALL(NAME, CALL) ::Profiler::startBlock(NAME); CALL; ::Profiler::endBlock();
 
 class Profiler
 {
