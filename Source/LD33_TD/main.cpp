@@ -1,6 +1,7 @@
 #include "Components.hpp"
 
 #include <Base/Engine.hpp>
+#include <Base/Music.hpp>
 #include <Kunlaboro/EntitySystem.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -11,6 +12,16 @@ int main(int argc, char** argv)
 	Engine eng;
 	Kunlaboro::EntitySystem sys;
 	sf::RenderWindow win;
+
+	auto& mus = Engine::get<MusicManager>();
+	{
+		sf::SoundBuffer buf;
+		buf.loadFromFile("Resources/bass.wav");
+
+		mus.addTrack(0, std::move(buf));
+	}
+
+	mus[0].setVolume(25.f, 4);
 
 	RegisterComponents(sys);
 
