@@ -1,11 +1,17 @@
 SET(HEADERS
 	Game/Components.hpp
+	Game/Enemy.hpp
+	Game/Level.hpp
+	Game/Tower.hpp
 	Menu/MainMenu.hpp
 	Components.hpp
 	IntroScreen.hpp
 )
 SET(SOURCES
 	Game/Components.cpp
+	Game/Enemy.cpp
+	Game/Level.cpp
+	Game/Tower.cpp
 	Menu/MainMenu.cpp
 	Components.cpp
 	IntroScreen.cpp

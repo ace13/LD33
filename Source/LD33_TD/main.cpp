@@ -22,6 +22,9 @@ int main(int argc, char** argv)
 	win.setFramerateLimit(250);
 #endif
 
+	auto eid = sys.createEntity();
+	sys.addComponent(eid, "Game.Level");
+
 	eng.run();
 
 	return 0;
