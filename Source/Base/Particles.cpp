@@ -123,6 +123,9 @@ void ParticleManager::InternalManager::update(float dt)
 
 void ParticleManager::InternalManager::draw(sf::RenderTarget& target)
 { PROFILE_BLOCK("Particle::Draw")
+	if (mParticles.empty())
+		return;
+
 	sf::VertexArray vex(sf::Quads, mParticles.size() * 4);
 
 	for (auto& p : mParticles)
