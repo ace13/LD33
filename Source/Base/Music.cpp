@@ -1,13 +1,21 @@
 #include "Music.hpp"
 
 
-MusicManager::Track::Track(sf::Sound&& sound) :
-	mVolumeTween(), mTrack(sound)
+MusicManager::Track::Track(sf::SoundBuffer&& sound) :
+	mVolumeTween(), mBuf(std::move(sound))
 {
+	mTrack.setBuffer(mBuf);
+	mTrack.setVolume(0);
 	mTrack.setLoop(true);
 	mTrack.stop();
 	mVolumeTween.start(0, 0, 0);
 }
+MusicManager::Track::Track(Track&& t) :
+	mVolumeTween(std::move(t.mVolumeTween)), mTrack(std::move(t.mTrack)), mBuf(std::move(t.mBuf))
+{
+	mTrack.setBuffer(mBuf);
+}
+
 MusicManager::Track::~Track()
 {
 
@@ -56,6 +64,11 @@ MusicManager::MusicManager(MusicManager&& other) :
 }
 MusicManager::~MusicManager()
 {
+}
+
+void MusicManager::addTrack(TrackID id, sf::SoundBuffer&& sound)
+{
+	mTracks.emplace(id, Track(std::move(sound)));
 }
 
 MusicManager::Track& MusicManager::operator[](TrackID id)
