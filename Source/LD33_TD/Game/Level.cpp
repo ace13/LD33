@@ -9,6 +9,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/Window/Event.hpp>
 
+#include <fstream>
 #include <set>
 #include <sstream>
 #include <unordered_map>
@@ -26,28 +27,10 @@ namespace std
 	};
 }
 
-const size_t LevelWidth = 12;
-const size_t LevelHeight = 12;
-
 Level::Level() : Kunlaboro::Component("Game.Level"),
 	pickedX(0), pickedY(0), mRebuildPath(true), mBestPath(new Path(Path::Invalid))
 {
 	mTilesTexture.loadFromFile("Resources/Tiles.png");
-
-	mTiles = {
-		Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water,
-		Tile_Water, Tile_Water, Tile_Mountain, Tile_Mountain, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Water,
-		Tile_Water, Tile_Water, Tile_Mountain, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Water,
-		Tile_Water, Tile_Mountain, Tile_Mountain, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_None, Tile_Grass, Tile_Grass, Tile_Water,
-		Tile_Water, Tile_Mountain, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_None, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Water,
-		Tile_Water, Tile_Grass, Tile_Grass, Tile_Grass, Tile_None, Tile_Grass, Tile_None, Tile_None, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Water,
-		Tile_Water, Tile_Grass, Tile_Grass, Tile_Grass, Tile_None, Tile_None, Tile_Forest, Tile_Mountain, Tile_Grass, Tile_Grass, Tile_Forest, Tile_Water,
-		Tile_Water, Tile_Grass, Tile_Grass, Tile_Grass, Tile_None, Tile_None, Tile_Forest, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Forest, Tile_Water,
-		Tile_Water, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_None, Tile_None, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Forest, Tile_Water,
-		Tile_Water, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_None, Tile_None, Tile_Grass, Tile_Grass, Tile_Forest, Tile_Forest, Tile_Water,
-		Tile_Water, Tile_Grass, Tile_Grass, Tile_Grass, Tile_Grass, Tile_None, Tile_None, Tile_Mountain, Tile_Grass, Tile_Forest, Tile_Water, Tile_Water,
-		Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_Water, Tile_None, Tile_None, Tile_None, Tile_Water, Tile_Water, Tile_Water, Tile_Water
-	};
 }
 
 Level::~Level()
@@ -81,12 +64,55 @@ void Level::addedToEntity()
 	requestMessage("Level.GetPath", [this](Kunlaboro::Message& msg) {
 		msg.handle(mBestPath);
 	});
+	requestMessage("LoadLevel", [this](Kunlaboro::Message& msg){
+		loadFromFile(msg.payload.get<std::string>());
+		msg.handle(nullptr);
+	}, true);
 
 	requestComponent("Game.Tower", [this](const Kunlaboro::Message&)
 	{
 		mRebuildPath = true;
 	}, false);
 	changeRequestPriority("Game.Tower", 9001);
+}
+
+void Level::loadFromFile(const std::string& file)
+{
+	std::ifstream ifs(file.c_str());
+
+	if (!ifs || ifs.eof())
+		return;
+
+	ifs >> mLevelSize.x >> mLevelSize.y
+		>> mStart.x >> mStart.y
+		>> mGoal.x >> mGoal.y;
+
+	std::string temp;
+	std::getline(ifs, temp);
+
+	mTiles.resize(mLevelSize.x * mLevelSize.y);
+	for (size_t y = 0; y < mLevelSize.y; ++y)
+	{
+		std::string line;
+		std::getline(ifs, line);
+
+		for (size_t x = 0; x < mLevelSize.x; ++x)
+		{
+			char c = line[x];
+			Tile t = Tile_None;
+			switch (c)
+			{
+			case 'w': t = Tile_Water; break;
+			case 'g': t = Tile_Grass; break;
+			case 'm': t = Tile_Mountain; break;
+			case 'f': t = Tile_Forest; break;
+			}
+
+			mTiles[y * mLevelSize.x + x] = t;
+		}
+	}
+
+	mRebuildPath = true;
 }
 
 sf::Vector2f Level::hexToCoords(const sf::Vector2i& hex) const
@@ -108,12 +134,12 @@ void Level::draw(sf::RenderTarget& target)
 
 	sf::VertexArray tiles(sf::Quads, mTiles.size());
 
-	for (int y = 0; y < LevelHeight; ++y)
+	for (int y = 0; y < mLevelSize.y; ++y)
 	{
-		for (int x = 0; x < LevelWidth; x += 2)
+		for (int x = 0; x < mLevelSize.x; x += 2)
 		{
-			drawTile({ x + 1, y }, mTiles[x + 1 + y * LevelWidth], tiles);
-			drawTile({ x, y }, mTiles[x + y * LevelWidth], tiles);
+			drawTile({ x + 1, y }, mTiles[x + 1 + y * mLevelSize.x], tiles);
+			drawTile({ x, y }, mTiles[x + y * mLevelSize.x], tiles);
 		}
 	}
 
@@ -192,7 +218,7 @@ Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const
 	if (from == to)
 		return Path::Invalid;
 
-	sf::IntRect level{ 0, 0, int(LevelWidth), int(LevelHeight) };
+	sf::IntRect level{ 0, 0, int(mLevelSize.x), int(mLevelSize.y) };
 	if (!level.contains(from) || !level.contains(to))
 		return Path::Invalid;
 
@@ -221,9 +247,9 @@ Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const
 	};
 	auto cost = [this,&blocked](const sf::Vector2i& a) -> float
 	{
-		if (a.x < 0 || a.y < 0 || a.x >= LevelWidth || a.y >= LevelHeight)
+		if (a.x < 0 || a.y < 0 || a.x >= mLevelSize.x || a.y >= mLevelSize.y)
 			return -1;
-		if (mTiles[a.x + a.y * LevelWidth] != Tile_Grass)
+		if (mTiles[a.x + a.y * mLevelSize.x] != Tile_Grass)
 			return -1;
 
 		/// \TODO Check if tower, then return ~10 - 100 - or something.
@@ -323,6 +349,7 @@ Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const
 		curPoint = closedSet[curPoint.Parent];
 	} while (curPoint.Pos != from);
 	ret.push(from);
+	ret.finish();
 
 	return ret;
 }

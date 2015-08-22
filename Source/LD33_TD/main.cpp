@@ -25,6 +25,7 @@ int main(int argc, char** argv)
 	auto eid = sys.createEntity();
 	sys.addComponent(eid, "Game.GameScreen");
 	sys.addComponent(eid, "Game.Level");
+	sys.sendLocalMessage(eid, "LoadLevel", std::string("Resources/Level1.txt"));
 
 	eng.run();
 

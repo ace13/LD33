@@ -55,7 +55,7 @@ void Tower::tick(float dt)
 			return;
 		}
 
-		mTarget->damage(dt);
+		mTarget->damage(dt / 2);
 		if (!mTarget->isAlive())
 		{
 			mTarget = nullptr;

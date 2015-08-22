@@ -16,6 +16,10 @@ void Path::push(const sf::Vector2i& pos)
 {
 	mPoints.push_back(pos);
 }
+void Path::finish()
+{
+	std::reverse(mPoints.begin(), mPoints.end());
+}
 
 Path::iterator Path::begin() const
 {

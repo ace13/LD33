@@ -15,6 +15,7 @@ public:
 
 	void begin(size_t size);
 	void push(const sf::Vector2i& pos);
+	void finish();
 
 	iterator begin() const;
 	iterator end() const;
