@@ -57,6 +57,8 @@ void Level::addedToEntity()
 		if (mRebuildPath) {
 			mBestPath = findPath({ 1, 10 }, { 8, 10 });
 			mRebuildPath = false;
+
+			sendGlobalMessage("Level.PathRebuilt", &mBestPath);
 		}
 	});
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
@@ -66,6 +68,9 @@ void Level::addedToEntity()
 	});
 	requestMessage("Level.CoordsToHex", [this](Kunlaboro::Message& msg) {
 		msg.handle(coordsToHex(msg.payload.get<sf::Vector2f>()));
+	});
+	requestMessage("Level.GetPath", [this](Kunlaboro::Message& msg) {
+		msg.handle(&mBestPath);
 	});
 
 	requestComponent("Game.Tower", [this](const Kunlaboro::Message&)

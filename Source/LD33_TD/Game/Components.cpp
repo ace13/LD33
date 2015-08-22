@@ -19,7 +19,7 @@ void Game::Physical::addedToEntity()
 	requestMessage("Game.Physical.Find", [this](Kunlaboro::Message& msg) {
 		auto question = msg.payload.get<std::tuple<sf::Vector2f, float>>();
 
-		if (VMath::DistanceSqrt(Position, std::get<0>(question)) < std::get<1>(question))
+		if (!Blocking && VMath::DistanceSqrt(Position, std::get<0>(question)) < std::get<1>(question))
 			msg.handle(Position);
 	});
 	requestMessage("Game.Physical.Blocking", [this](const Kunlaboro::Message& msg){

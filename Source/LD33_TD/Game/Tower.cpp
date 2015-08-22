@@ -1,4 +1,5 @@
 #include "Tower.hpp"
+#include "Enemy.hpp"
 #include "Components.hpp"
 #include <Base/Profiling.hpp>
 
@@ -27,8 +28,15 @@ void Tower::addedToEntity()
 }
 
 void Tower::tick(float dt)
-{ PROFILE
-	
+{ PROFILE;
+	auto resp = sendGlobalQuestion("Game.Physical.Find", std::make_tuple(mPhysical->Position, 48.f));
+
+	if (resp.handled)
+	{
+		auto enemy = (Enemy*)getEntitySystem()->getAllComponentsOnEntity(resp.sender->getOwnerId(), "Game.Enemy").front();
+
+		enemy->damage(1 * dt);
+	}
 }
 void Tower::draw(sf::RenderTarget& target)
 {

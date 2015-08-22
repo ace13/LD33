@@ -35,6 +35,11 @@ void GameScreen::event(sf::Event& ev)
 			resp = sendGlobalQuestion("Level.HexToCoords", resp.payload.get<sf::Vector2i>());
 			sendMessageToEntity(eid, "SetPosition", resp.payload.get<sf::Vector2f>());
 		}
+		else if (ev.mouseButton.button == sf::Mouse::XButton1)
+		{
+			getEntitySystem()->createEntity("Game.Enemy");
+
+		}
 	}
 	else if (ev.type == sf::Event::MouseWheelMoved)
 	{
