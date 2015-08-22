@@ -1,4 +1,5 @@
 #include "Level.hpp"
+#include "Components.hpp"
 #include <Base/Fonts.hpp>
 #include <Base/Profiling.hpp>
 #include <Base/VectorMath.hpp>
@@ -49,48 +50,34 @@ Level::Level() : Kunlaboro::Component("Game.Level"),
 	};
 }
 
-static Path toDraw;
-static sf::Vector2i start;
-static sf::RenderTarget* wind;
-static sf::View mouseView;
-
 void Level::addedToEntity()
 {
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
-	requestMessage("LD33.Event", [this](const Kunlaboro::Message& msg) {
-		sf::Event& ev = *msg.payload.get<sf::Event*>();
 
-		if (ev.type == sf::Event::MouseButtonPressed && ev.mouseButton.button == sf::Mouse::Left)
-		{
-			auto worldMouse = wind->mapPixelToCoords(sf::Mouse::getPosition((sf::RenderWindow&)*wind), mouseView);
-			start = { int(worldMouse.x - 8) / 49, int(worldMouse.y - 32 - (((int(worldMouse.x - 8) / 49) % 2) == 0) * 16) / 32 };
-		}
-		else if (ev.type == sf::Event::MouseButtonReleased && ev.mouseButton.button == sf::Mouse::Left)
-		{
-			auto worldMouse = wind->mapPixelToCoords(sf::Mouse::getPosition((sf::RenderWindow&)*wind), mouseView);
-			auto end = sf::Vector2i{ int(worldMouse.x - 8) / 49, int(worldMouse.y - 32 - (((int(worldMouse.x - 8) / 49) % 2) == 0) * 16) / 32 };
-
-			toDraw = findPath(start, end);
-		}
+	requestMessage("Level.HexToCoords", [this](Kunlaboro::Message& msg) {
+		msg.handle(hexToCoords(msg.payload.get<sf::Vector2i>()));
 	});
+	requestMessage("Level.CoordsToHex", [this](Kunlaboro::Message& msg) {
+		msg.handle(coordsToHex(msg.payload.get<sf::Vector2f>()));
+	});
+}
 
-	toDraw = findPath({ 1, 10 }, { 8, 10 });
+sf::Vector2f Level::hexToCoords(const sf::Vector2i& hex) const
+{
+	return{ hex.x * 49.f + 32, hex.y * 32.f + ((hex.x & 1) == 0) * 16 + 47 };
+}
+sf::Vector2i Level::coordsToHex(const sf::Vector2f& coords) const
+{
+	return{ int(coords.x - 8) / 49, int(coords.y - 32 - (((int(coords.x - 8) / 49) % 2) == 0) * 16) / 32 };
 }
 
 void Level::draw(sf::RenderTarget& target)
 { PROFILE
-	wind = &target;
 	auto mouse = sf::Mouse::getPosition((sf::RenderWindow&)target);
 
-	auto view = target.getView();
-	view.zoom(0.25);
-	view.move(9 * 32, 7 * 32);
-	target.setView(view);
-	mouseView = view;
-
-	auto worldMouse = target.mapPixelToCoords(mouse);
-	pickedX = int(worldMouse.x -8) / 49;
-	pickedY = int(worldMouse.y -32 - ((pickedX%2)==0)*16) / 32;
+	auto picked = coordsToHex(target.mapPixelToCoords(mouse));
+	pickedX = picked.x;
+	pickedY = picked.y;
 
 	sf::VertexArray tiles(sf::Quads, mTiles.size());
 
@@ -103,18 +90,7 @@ void Level::draw(sf::RenderTarget& target)
 		}
 	}
 
-	for (auto& step : toDraw)
-	{
-		drawTile(step, Tile_Picker, tiles);
-	}
-
 	target.draw(tiles, &mTilesTexture);
-
-	
-
-	view.move(9*-32, 7*-32);
-	view.zoom(4);
-	target.setView(view);
 }
 
 inline void Level::drawTile(const sf::Vector2i& pos, Tile tile, sf::VertexArray& tiles)
@@ -180,7 +156,7 @@ inline void Level::drawTile(const sf::Vector2i& pos, Tile tile, sf::VertexArray&
 }
 
 Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const
-{ PROFILE
+{
 	if (from == to)
 		return Path::Invalid;
 
@@ -188,11 +164,18 @@ Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const
 	if (!level.contains(from) || !level.contains(to))
 		return Path::Invalid;
 
+	std::vector<sf::Vector2i> blocked;
+	{
+		std::vector<Game::Physical*> blockers;
+		sendGlobalMessage("Game.Physical.Blocking", &blockers);
+		for (auto& it : blockers)
+			blocked.push_back(coordsToHex(it->Position));
+	}
+		
 	Path ret;
 
 	auto heuristic = [&from](const sf::Vector2i& a, const sf::Vector2i& b) -> float
 	{
-		
 		sf::Vector3f eA(a.x, -a.x - a.y, a.y - (a.x - (a.x & 1)) / 2.f),
 			eB(b.x, -b.x - b.y, b.y - (b.x - (b.x & 1)) / 2.f);
 
@@ -203,23 +186,19 @@ Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const
 		float cross = std::abs(dx1*dy2 - dx2*dy1);
 
 		return (std::abs(eA.x - eB.x) + std::abs(eA.y - eB.y) + std::abs(eA.z - eB.z)) / 2.f + cross * 0.001f;
-		
-		/*
-		
-		
-		return (std::abs(a.x - b.x) + std::abs(a.y - b.y)) / 2.f;
-		*/
-
-
-		// Euclidian distance
-		//return VMath::DistanceSqrt(sf::Vector2f(a), sf::Vector2f(b));
 	};
-	auto cost = [this](const sf::Vector2i& a) -> float
+	auto cost = [this,&blocked](const sf::Vector2i& a) -> float
 	{
 		if (a.x < 0 || a.y < 0 || a.x >= LevelWidth || a.y >= LevelHeight)
 			return -1;
 		if (mTiles[a.x + a.y * LevelWidth] != Tile_Grass)
 			return -1;
+
+		/// \TODO Check if tower, then return ~10 - 100 - or something.
+		/// So that blocked customers can walk through blocking towers.
+		if (std::find(blocked.begin(), blocked.end(), a) != blocked.end())
+			return 100;
+
 		return 1;
 	};
 
@@ -242,8 +221,6 @@ Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const
 			return Priority < rhs.Priority;
 		}
 	};
-
-	/// \TODO A*
 
 	AStarNode start{ from, from, 0 };
 

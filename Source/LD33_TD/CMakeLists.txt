@@ -3,6 +3,7 @@ SET(HEADERS
 	Game/Towers/Basic.hpp
 	Game/Components.hpp
 	Game/Enemy.hpp
+	Game/GameScreen.hpp
 	Game/Level.hpp
 	Game/Path.hpp
 	Game/Tower.hpp
@@ -15,6 +16,7 @@ SET(SOURCES
 	Game/Towers/Basic.cpp
 	Game/Components.cpp
 	Game/Enemy.cpp
+	Game/GameScreen.cpp
 	Game/Level.cpp
 	Game/Path.cpp
 	Game/Tower.cpp

@@ -10,6 +10,7 @@ struct Physical : public Kunlaboro::Component
 {
 	sf::Vector2f Position, Velocity;
 	float Radius;
+	bool Blocking;
 
 	Physical();
 	void addedToEntity();

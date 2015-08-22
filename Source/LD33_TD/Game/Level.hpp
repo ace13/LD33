@@ -29,6 +29,9 @@ public:
 
 	void draw(sf::RenderTarget& target);
 
+	sf::Vector2f hexToCoords(const sf::Vector2i& hex) const;
+	sf::Vector2i coordsToHex(const sf::Vector2f& coords) const;
+
 private:
 	void drawTile(const sf::Vector2i& pos, Tile tile, sf::VertexArray& arr);
 	bool tilePassable(const sf::Vector2i& tile);
