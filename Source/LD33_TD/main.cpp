@@ -1,3 +1,5 @@
+#include "Components.hpp"
+
 #include <Base/Engine.hpp>
 #include <Kunlaboro/EntitySystem.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -9,6 +11,8 @@ int main(int argc, char** argv)
 	Engine eng;
 	Kunlaboro::EntitySystem sys;
 	sf::RenderWindow win;
+
+
 
 	eng.setSystem(sys);
 	eng.setWindow(win);
