@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Path.hpp"
+
 #include <Kunlaboro/Component.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
@@ -23,11 +25,13 @@ public:
 
 	void addedToEntity();
 	
+	Path findPath(const sf::Vector2i& from, const sf::Vector2i& to) const;
 
 	void draw(sf::RenderTarget& target);
 
 private:
-	void drawTile(int x, int y, Tile tile, sf::VertexArray& arr);
+	void drawTile(const sf::Vector2i& pos, Tile tile, sf::VertexArray& arr);
+	bool tilePassable(const sf::Vector2i& tile);
 
 	int pickedX, pickedY;
 	std::vector<Tile> mTiles;

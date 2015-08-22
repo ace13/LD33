@@ -1,16 +1,22 @@
 SET(HEADERS
+	Game/Enemies/Basic.hpp
+	Game/Towers/Basic.hpp
 	Game/Components.hpp
 	Game/Enemy.hpp
 	Game/Level.hpp
+	Game/Path.hpp
 	Game/Tower.hpp
 	Menu/MainMenu.hpp
 	Components.hpp
 	IntroScreen.hpp
 )
 SET(SOURCES
+	Game/Enemies/Basic.cpp
+	Game/Towers/Basic.cpp
 	Game/Components.cpp
 	Game/Enemy.cpp
 	Game/Level.cpp
+	Game/Path.cpp
 	Game/Tower.cpp
 	Menu/MainMenu.cpp
 	Components.cpp
@@ -21,6 +27,10 @@ SET(SOURCES
 
 SOURCE_GROUP("Header files\\Game" REGULAR_EXPRESSION "Game/[^./]+.(hpp|inl)")
 SOURCE_GROUP("Source files\\Game" REGULAR_EXPRESSION "Game/[^./]+.cpp")
+SOURCE_GROUP("Header files\\Game\\Enemies" REGULAR_EXPRESSION "Game/Enemies/[^./]+.(hpp|inl)")
+SOURCE_GROUP("Source files\\Game\\Enemies" REGULAR_EXPRESSION "Game/Enemies/[^./]+.cpp")
+SOURCE_GROUP("Header files\\Game\\Towers" REGULAR_EXPRESSION "Game/Towers/[^./]+.(hpp|inl)")
+SOURCE_GROUP("Source files\\Game\\Towers" REGULAR_EXPRESSION "Game/Towers/[^./]+.cpp")
 
 SOURCE_GROUP("Header files\\Menu" REGULAR_EXPRESSION "Menu/[^./]+.(hpp|inl)")
 SOURCE_GROUP("Source files\\Menu" REGULAR_EXPRESSION "Menu/[^./]+.cpp")
