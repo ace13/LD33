@@ -5,7 +5,8 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
-Tower::Tower() : Kunlaboro::Component("Game.Tower")
+Tower::Tower() : Kunlaboro::Component("Game.Tower"),
+	mDefinition(nullptr), mPhysical(nullptr), mXP(0), mCooldown(0), mLevel(0)
 {
 
 }

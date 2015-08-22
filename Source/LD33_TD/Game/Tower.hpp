@@ -23,6 +23,6 @@ private:
 	TowerDefinition* mDefinition;
 	Game::Physical* mPhysical;
 
-	float mXP;
+	float mXP, mCooldown;
 	unsigned int mLevel;
 };

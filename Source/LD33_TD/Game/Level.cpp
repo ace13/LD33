@@ -30,7 +30,7 @@ const size_t LevelWidth = 12;
 const size_t LevelHeight = 12;
 
 Level::Level() : Kunlaboro::Component("Game.Level"),
-	pickedX(0), pickedY(0)
+	pickedX(0), pickedY(0), mRebuildPath(true)
 {
 	mTilesTexture.loadFromFile("Resources/Tiles.png");
 
@@ -53,8 +53,13 @@ Level::Level() : Kunlaboro::Component("Game.Level"),
 
 void Level::addedToEntity()
 {
+	requestMessage("LD33.Tick", [this](const Kunlaboro::Message& msg) {
+		if (mRebuildPath) {
+			mBestPath = findPath({ 1, 10 }, { 8, 10 });
+			mRebuildPath = false;
+		}
+	});
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
-
 
 	requestMessage("Level.HexToCoords", [this](Kunlaboro::Message& msg) {
 		msg.handle(hexToCoords(msg.payload.get<sf::Vector2i>()));
@@ -62,6 +67,12 @@ void Level::addedToEntity()
 	requestMessage("Level.CoordsToHex", [this](Kunlaboro::Message& msg) {
 		msg.handle(coordsToHex(msg.payload.get<sf::Vector2f>()));
 	});
+
+	requestComponent("Game.Tower", [this](const Kunlaboro::Message&)
+	{
+		mRebuildPath = true;
+	}, false);
+	changeRequestPriority("Game.Tower", 9001);
 }
 
 sf::Vector2f Level::hexToCoords(const sf::Vector2i& hex) const
@@ -90,6 +101,11 @@ void Level::draw(sf::RenderTarget& target)
 			drawTile({ x + 1, y }, mTiles[x + 1 + y * LevelWidth], tiles);
 			drawTile({ x, y }, mTiles[x + y * LevelWidth], tiles);
 		}
+	}
+
+	for (auto& it : mBestPath)
+	{
+		drawTile(it, Tile_Picker, tiles);
 	}
 
 	target.draw(tiles, &mTilesTexture);

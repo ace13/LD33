@@ -39,4 +39,6 @@ private:
 	int pickedX, pickedY;
 	std::vector<Tile> mTiles;
 	sf::Texture mTilesTexture;
+	bool mRebuildPath;
+	Path mBestPath;
 };
