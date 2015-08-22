@@ -50,9 +50,11 @@ Level::Level() : Kunlaboro::Component("Game.Level"),
 	};
 }
 
+
 void Level::addedToEntity()
 {
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
+
 
 	requestMessage("Level.HexToCoords", [this](Kunlaboro::Message& msg) {
 		msg.handle(hexToCoords(msg.payload.get<sf::Vector2i>()));
@@ -260,7 +262,7 @@ Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const
 			if (cost(n) < 0)
 				continue;
 
-			float g = cur.Priority + heuristic(cur.Pos, n);
+			float g = cur.Priority + cost(n) + heuristic(cur.Pos, n);
 			
 			if (openList.count(n) > 0 && openList[n].Priority > g)
 				openList.erase(n);

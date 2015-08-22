@@ -17,7 +17,7 @@ void GameScreen::event(sf::Event& ev)
 {
 	if (ev.type == sf::Event::MouseButtonPressed)
 	{
-		if (ev.mouseButton.button == sf::Mouse::Left)
+		if (ev.mouseButton.button == sf::Mouse::Right)
 		{
 			mMouseDown = true;
 			mMousePos = sf::Mouse::getPosition(*(sf::RenderWindow*)mTarget);
@@ -25,9 +25,9 @@ void GameScreen::event(sf::Event& ev)
 	}
 	else if (ev.type == sf::Event::MouseButtonReleased)
 	{
-		if (ev.mouseButton.button == sf::Mouse::Left)
+		if (ev.mouseButton.button == sf::Mouse::Right)
 			mMouseDown = false;
-		else if (ev.mouseButton.button == sf::Mouse::Right)
+		else if (ev.mouseButton.button == sf::Mouse::Middle)
 		{
 			auto eid = getEntitySystem()->createEntity("Game.Tower");
 
