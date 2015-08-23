@@ -162,6 +162,7 @@ void Level::loadFromFile(const std::string& file)
 
 		ifs >> num >> str >> rate;
 		ifs.getline(&name.front(), 256);
+		name = name.c_str();
 
 		wm.addWave({ num, str, rate, name });
 	}

@@ -1,26 +1,37 @@
 #include "GameScreen.hpp"
 #include "Components.hpp"
+#include "Wave.hpp"
 #include "Towers/Basic.hpp"
 #include "UI/TowerRadial.hpp"
 
 #include <Base/Fonts.hpp>
 #include <Base/Profiling.hpp>
+#include <Base/Tweening.hpp>
 #include <Base/VectorMath.hpp>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
+/// \FIXME TOO MUCH GLOBAL, VOLVO PLZ NERF
 RadialMenu asdf;
 int goldValue = 100;
 Profiler::TimePoint mouseDown;
+Easer waveEaser(Tween::QuadraticIn);
+WaveManager* wMan;
 
 GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
 	mMouseDown(false), mMenu(false), mSelectedTower(0), mTarget(nullptr)
 {
+	waveEaser.start(0, 1, 1);
+	waveEaser.update(1);
 }
 void GameScreen::addedToEntity()
 {
+	requestComponent("Game.WaveManager", [](const Kunlaboro::Message& msg) {
+		wMan = (WaveManager*)msg.sender;
+	});
+
 	requestMessage("GotGold", [](const Kunlaboro::Message& msg) {
 		goldValue += msg.payload.get<int>();
 	});
@@ -55,20 +66,18 @@ void GameScreen::event(sf::Event& ev)
 			auto now = Profiler::Clock::now();
 			if ((now - mouseDown) < std::chrono::duration<int, std::milli>(150))
 			{
+				asdf.clearEntries();
+
+				asdf.addEntry("Begin Wave", "Resources/Start.png");
+				asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
+
 				auto resp = sendGlobalQuestion("Level.Valid", mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera));
 				if (resp.handled && resp.payload.get<bool>())
 				{
 					mMenu = true;
 
-					asdf.clearEntries();
-
-					asdf.addEntry("Begin Wave", "Resources/Start.png");
-
 					if (goldValue >= 25)
 						asdf.addEntry("Build Tower (25G)", "Resources/Plus.png");
-
-					asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
-					asdf.open();
 				}
 				else if (resp.handled && !resp.payload.get<bool>())
 				{
@@ -82,18 +91,17 @@ void GameScreen::event(sf::Event& ev)
 							mMenu = true;
 							mSelectedTower = it->getOwnerId();
 
-							asdf.clearEntries();
 							asdf.addEntry("Upgrade", "Resources/Plus.png");
 							asdf.addEntry("Sell", "Resources/Plus.png");
 							asdf.addEntry("Do something else", "Resources/Plus.png");
 
 							asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
-							asdf.open();
-
 							break;
 						}
 					}
 				}
+
+				asdf.open();
 			}
 		}
 	}
@@ -125,10 +133,19 @@ void GameScreen::event(sf::Event& ev)
 }
 void GameScreen::update(float dt)
 {
+	waveEaser.update(dt);
 	asdf.update(dt);
+
 	if (asdf.isClosed() && mMenu)
 	{
 		mMenu = false;
+
+		if (asdf.getSelection() == "Begin Wave")
+		{
+			sendMessage("NextWave");
+			waveEaser.reset();
+			return;
+		}
 
 		if (mSelectedTower != 0)
 		{
@@ -152,10 +169,6 @@ void GameScreen::update(float dt)
 				sendMessageToEntity(eid, "SetPosition", resp.payload.get<sf::Vector2f>());
 
 				sendMessageToEntity(eid, "Define", &Towers::BasicTower::Instance);
-			}
-			else if (asdf.getSelection() == "Begin Wave")
-			{
-				sendMessage("NextWave");
 			}
 		}
 	}
@@ -206,5 +219,11 @@ void GameScreen::drawUI(sf::RenderTarget& target)
 	gold.setString(std::to_string(goldValue));
 	gold.setColor({ 255, 255, 0 });
 
+	target.draw(gold);
+
+	gold.setString(wMan->getCurWave().Name);
+	gold.setColor(sf::Color::White);
+
+	gold.setPosition(10, target.getView().getSize().y - gold.getLocalBounds().height * 4);
 	target.draw(gold);
 }

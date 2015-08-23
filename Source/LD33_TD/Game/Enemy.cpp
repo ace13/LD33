@@ -27,6 +27,13 @@ void Enemy::addedToEntity()
 	}, true);
 
 	requestMessage("Level.PathRebuilt", [this](const Kunlaboro::Message& msg) {
+		if (mPathIter == mPath->end())
+		{
+			mPath = msg.payload.get<Path*>();
+			mPathIter = mPath->end();
+			return;
+		}
+
 		auto oldPos = *mPathIter;
 
 		mPath = msg.payload.get<Path*>();

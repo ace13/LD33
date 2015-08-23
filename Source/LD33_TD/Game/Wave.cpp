@@ -41,12 +41,19 @@ void WaveManager::nextWave()
 	}
 }
 
-const WaveManager::Wave& WaveManager::curWave() const
+const WaveManager::Wave& WaveManager::getCurWave() const
 {
 	if (mCurWave == mWaves.end())
 		return Wave::None;
 
 	return *mCurWave;
+}
+const WaveManager::Wave& WaveManager::getNextWave() const
+{
+	if (mNextWave == mWaves.end())
+		return Wave::None;
+
+	return *mNextWave;
 }
 bool WaveManager::atEnd() const
 {

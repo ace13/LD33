@@ -96,7 +96,7 @@ void Tower::tick(float dt)
 			//mXP += totalXP * 2;
 
 			std::vector<Game::Physical*> blockers;
-			auto aoe = sendGlobalQuestion("Game.Physical.Blocking", std::make_tuple(&blockers, resp.payload.get<sf::Vector2f>(), 256.f));
+			auto aoe = sendGlobalQuestion("Game.Physical.Blocking", std::make_tuple(&blockers, resp.payload.get<sf::Vector2f>(), 128.f));
 			for (auto& tower : blockers)
 			{
 				sendMessageToEntity(tower->getOwnerId(), "GotXP", (totalXP * 3) / blockers.size());

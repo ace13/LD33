@@ -24,7 +24,9 @@ public:
 
 	void addWave(const Wave& wave);
 	void nextWave();
-	const Wave& curWave() const;
+
+	const Wave& getCurWave() const;
+	const Wave& getNextWave() const;
 
 	bool atEnd() const;
 
