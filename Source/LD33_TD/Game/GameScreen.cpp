@@ -68,7 +68,8 @@ void GameScreen::event(sf::Event& ev)
 			{
 				asdf.clearEntries();
 
-				asdf.addEntry("Begin Wave", "Resources/Start.png");
+				if (wMan->getCurWave() == WaveManager::Wave::None)
+					asdf.addEntry("Begin Wave", "Resources/Start.png");
 				asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
 
 				auto resp = sendGlobalQuestion("Level.Valid", mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera));
@@ -101,7 +102,8 @@ void GameScreen::event(sf::Event& ev)
 					}
 				}
 
-				asdf.open();
+				if (asdf.hasEntries())
+					asdf.open();
 			}
 		}
 	}

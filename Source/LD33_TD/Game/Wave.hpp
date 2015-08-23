@@ -15,7 +15,7 @@ public:
 		std::string Name;
 
 		static const Wave None;
-		inline bool operator==(const Wave& o) { return Name == o.Name; }
+		inline bool operator==(const Wave& o) const { return Name == o.Name; }
 	};
 
 	WaveManager();
