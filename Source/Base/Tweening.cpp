@@ -30,7 +30,7 @@ void Easer::reset(bool reverse)
 }
 void Easer::reverse()
 {
-	float temp = mBegin;
+	float temp = mEnd;
 	mEnd = mBegin;
 	mBegin = temp;
 }
