@@ -19,7 +19,10 @@ public:
 	void open();
 	void close();
 
+	void clearEntries();
 	void addEntry(const std::string& name, const std::string& file);
+	bool hasEntries() const;
+
 	void setPosition(const sf::Vector2f&);
 	const sf::Vector2f& getPosition() const;
 

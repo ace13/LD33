@@ -21,7 +21,7 @@ void RadialMenu::open()
 	mState = State_Opening;
 	mSizeEaser.setFunc(Tween::BackOut);
 	mSizeEaser.start(0.f, 1.f, 0.5f);
-	mRotationEaser.start(0.f, 1.f, 1.75f);
+	mRotationEaser.start(0.f, 1.f, 0.95f);
 }
 void RadialMenu::close()
 {
@@ -30,6 +30,10 @@ void RadialMenu::close()
 	mSizeEaser.start(1.f, 0.f, 0.25f);
 }
 
+void RadialMenu::clearEntries()
+{
+	mEntries.clear();
+}
 void RadialMenu::addEntry(const std::string& name, const std::string& file)
 {
 	sf::Texture tex;
@@ -38,6 +42,10 @@ void RadialMenu::addEntry(const std::string& name, const std::string& file)
 		tex.setSmooth(true);
 		mEntries.emplace_back(name, std::move(tex));
 	}
+}
+bool RadialMenu::hasEntries() const
+{
+	return !mEntries.empty();
 }
 
 void RadialMenu::event(sf::Event& ev)
@@ -155,6 +163,10 @@ void RadialMenu::draw(sf::RenderTarget& target)
 
 	target.draw(radial);
 
+	radial.setOutlineColor({ 179,179,179});
+	radial.setOutlineThickness(2);
+	target.draw(radial);
+
 	radial.setOutlineColor(sf::Color::Black);
 	radial.setFillColor(sf::Color::White);
 	radial.setRadius(16);
@@ -163,11 +175,12 @@ void RadialMenu::draw(sf::RenderTarget& target)
 	sf::Sprite sprite;
 	sprite.setScale(*mSizeEaser, *mSizeEaser);
 
+	sf::Text popup(mSelected, sf::getDefaultFont());
 	size_t i = 0, j = mEntries.size();
 	for (auto& entry : mEntries)
 	{
 		float ang = -float(M_PI_2) + (float(M_PI * 2) / j) * i * *mRotationEaser;
-		float scale = *mSizeEaser;
+		float scale = *mSizeEaser * 0.75f;
 
 		if (entry.first == mSelected)
 		{
@@ -194,24 +207,30 @@ void RadialMenu::draw(sf::RenderTarget& target)
 
 		if (entry.first == mSelected)
 		{
-			sf::Text popup(entry.first, sf::getDefaultFont());
-
 			popup.setPosition(sprite.getPosition() - sf::Vector2f(0, 32));
 			popup.setOrigin(0, popup.getLocalBounds().height);
-			popup.setColor(sf::Color::Black);
-
-			popup.move(-2, 0);
-			target.draw(popup);
-			popup.move(4, 0);
-			target.draw(popup);
-
-			popup.move(-2, 0);
-			popup.setColor(sf::Color::White);
-
-			target.draw(popup);
 		}
 
 		++i;
+	}
+
+	if (!mSelected.empty())
+	{
+		popup.setColor(sf::Color::Black);
+
+		popup.move(-2, 2);
+		target.draw(popup);
+		popup.move(4, 0);
+		target.draw(popup);
+		popup.move(0, 4);
+		target.draw(popup);
+		popup.move(-4, 0);
+		target.draw(popup);
+
+		popup.move(2, -2);
+		popup.setColor(sf::Color::White);
+
+		target.draw(popup);
 	}
 }
 

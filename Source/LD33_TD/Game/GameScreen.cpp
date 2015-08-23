@@ -10,8 +10,12 @@ GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
 	mMouseDown(false), mMenu(false), mTarget(nullptr)
 {
 	asdf.addEntry("Build Tower", "Resources/Plus.png");
-
-	
+	asdf.addEntry("Build Tower2", "Resources/Plus.png");
+	asdf.addEntry("Build Tower3", "Resources/Plus.png");
+	asdf.addEntry("Build Tower4", "Resources/Plus.png");
+	asdf.addEntry("Build Tower5", "Resources/Plus.png");
+	asdf.addEntry("Build Tower6", "Resources/Plus.png");
+	asdf.addEntry("Build Tower7", "Resources/Plus.png");
 }
 void GameScreen::addedToEntity()
 {
@@ -39,6 +43,7 @@ void GameScreen::event(sf::Event& ev)
 		else if (ev.mouseButton.button == sf::Mouse::Left && asdf.isClosed())
 		{
 			mMenu = true;
+			
 			asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
 			asdf.open();
 		}
@@ -48,7 +53,7 @@ void GameScreen::event(sf::Event& ev)
 
 		}
 	}
-	else if (ev.type == sf::Event::MouseWheelMoved)
+	else if (ev.type == sf::Event::MouseWheelMoved && asdf.isClosed())
 	{
 		auto delta = ev.mouseWheel.delta;
 
@@ -115,6 +120,11 @@ void GameScreen::draw(sf::RenderTarget& target)
 	}
 
 	target.setView(mCamera);
+
+	if (!asdf.isClosed())
+	{
+
+	}
 }
 
 void GameScreen::drawUI(sf::RenderTarget& target)
