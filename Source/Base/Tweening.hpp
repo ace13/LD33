@@ -36,7 +36,7 @@ namespace Tween
 	/// f(t) = t^3-t*sin(t*pi)
 	inline float BackIn(float t) { return t * t * t - t * std::sin(t * float(M_PI)); }
 	/// f(t) = 1-((1-t)^3-(1-t)sin((1-t)pi)
-	inline float BackOut(float t) { float f = 1 - t; return -(f * f * f - f * std::sin(f * float(M_PI))); }
+	inline float BackOut(float t) { float f = 1 - t; return 1 - (f * f * f - f * std::sin(f * float(M_PI))); }
 	float BounceOut(float);
 	/// f(t) = MAGIC
 	inline float BounceIn(float t) { return 1 - BounceOut(1 - t); }
