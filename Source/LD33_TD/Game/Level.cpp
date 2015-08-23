@@ -55,6 +55,22 @@ void Level::addedToEntity()
 	});
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
 
+	requestMessage("Level.Valid", [this](Kunlaboro::Message& msg) {
+		sf::Vector2i hex;
+		if (msg.payload.is<sf::Vector2i>())
+			hex = msg.payload.get<sf::Vector2i>();
+		else if (msg.payload.is<sf::Vector2f>())
+			hex = coordsToHex(msg.payload.get<sf::Vector2f>());
+		else
+			return;
+
+		if (hex.x < 0 || hex.y < 0 || hex.x >= mLevelSize.x || hex.y >= mLevelSize.y)
+			msg.handle(false);
+		else if (mTiles[hex.x + hex.y * mLevelSize.x] != Tile_Grass)
+			msg.handle(false);
+		else
+			msg.handle(true);
+	});
 	requestMessage("Level.HexToCoords", [this](Kunlaboro::Message& msg) {
 		msg.handle(hexToCoords(msg.payload.get<sf::Vector2i>()));
 	});

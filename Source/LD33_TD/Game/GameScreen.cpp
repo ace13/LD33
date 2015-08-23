@@ -42,10 +42,14 @@ void GameScreen::event(sf::Event& ev)
 			mMouseDown = false;
 		else if (ev.mouseButton.button == sf::Mouse::Left && asdf.isClosed())
 		{
-			mMenu = true;
-			
-			asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
-			asdf.open();
+			auto resp = sendGlobalQuestion("Level.Valid", mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera));
+			if (resp.handled && resp.payload.get<bool>())
+			{
+				mMenu = true;
+
+				asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
+				asdf.open();
+			}
 		}
 		else if (ev.mouseButton.button == sf::Mouse::XButton1)
 		{
