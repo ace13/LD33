@@ -23,9 +23,9 @@ void RadialMenu::open()
 	mSizeEaser.setFunc(Tween::BackOut);
 	mSizeEaser.start(0.f, 1.f, 0.5f);
 
-	mRotationEaser.setFunc(Tween::BounceOut);
-	mRotationEaser.start(0.f, 1.f, 1.f);
-	mRotationEaser.update(0.2f);
+	mRotationEaser.setFunc(Tween::LinearIn);
+	mRotationEaser.start(0.f, 1.f, 0.2f);
+	//mRotationEaser.update(0.2f);
 }
 void RadialMenu::close()
 {

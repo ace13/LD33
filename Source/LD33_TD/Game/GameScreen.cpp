@@ -2,12 +2,15 @@
 #include "UI/TowerRadial.hpp"
 #include "Components.hpp"
 
+#include <Base/Fonts.hpp>
 #include <Base/VectorMath.hpp>
 
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
 RadialMenu asdf;
+int goldValue = 100;
 
 GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
 	mMouseDown(false), mMenu(false), mSelectedTower(0), mTarget(nullptr)
@@ -15,6 +18,10 @@ GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
 }
 void GameScreen::addedToEntity()
 {
+	requestMessage("GotGold", [](const Kunlaboro::Message& msg) {
+		goldValue += msg.payload.get<int>();
+	});
+
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
 	requestMessage("LD33.DrawUI", [this](const Kunlaboro::Message& msg) { drawUI(*msg.payload.get<sf::RenderTarget*>()); });
 	changeRequestPriority("LD33.Draw", -9001);
@@ -44,7 +51,11 @@ void GameScreen::event(sf::Event& ev)
 				mMenu = true;
 
 				asdf.clearEntries();
-				asdf.addEntry("Build Tower", "Resources/Plus.png");
+				
+				asdf.addEntry("Begin Wave", "Resources/Start.png");
+
+				if (goldValue >= 25)
+					asdf.addEntry("Build Tower (25G)", "Resources/Plus.png");
 
 				asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
 				asdf.open();
@@ -124,8 +135,9 @@ void GameScreen::update(float dt)
 		}
 		else
 		{
-			if (asdf.getSelection() == "Build Tower")
+			if (asdf.getSelection() == "Build Tower (25G)")
 			{
+				goldValue -= 25;
 				auto eid = getEntitySystem()->createEntity("Game.Tower");
 
 				auto resp = sendGlobalQuestion("Level.CoordsToHex", mTarget->mapPixelToCoords(sf::Vector2i(asdf.getPosition()), mCamera));
@@ -169,4 +181,15 @@ void GameScreen::draw(sf::RenderTarget& target)
 void GameScreen::drawUI(sf::RenderTarget& target)
 {
 	asdf.draw(target);
+
+	sf::Text gold("Gold: ", sf::getDefaultFont());
+	gold.setPosition(10, target.getView().getSize().y - gold.getLocalBounds().height * 2);
+
+	target.draw(gold);
+
+	gold.move(gold.getLocalBounds().width, 0);
+	gold.setString(std::to_string(goldValue));
+	gold.setColor({ 255, 255, 0 });
+
+	target.draw(gold);
 }

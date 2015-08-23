@@ -85,18 +85,33 @@ void Tower::tick(float dt)
 		}
 
 		mTarget->damage(dt / 2.f * mLevel);
-		if (!mTarget->isAlive())
+		if (!mTarget->isAlive() && !mTarget->isDeathHandled())
 		{
+			mTarget->markDeathHandled();
+
 			float totalXP = mTarget->getXP() / 5.f;
 			mXP += totalXP * 2;
-			// TODO: Assists
-			mXP += totalXP * 2;
+
+			/// \TODO: Assists
+			//mXP += totalXP * 2;
 
 			std::vector<Game::Physical*> blockers;
 			auto aoe = sendGlobalQuestion("Game.Physical.Blocking", std::make_tuple(&blockers, resp.payload.get<sf::Vector2f>(), 256.f));
 			for (auto& tower : blockers)
 			{
-				sendMessageToEntity(tower->getOwnerId(), "GotXP", totalXP / blockers.size());
+				sendMessageToEntity(tower->getOwnerId(), "GotXP", (totalXP * 3) / blockers.size());
+			}
+
+			sendGlobalMessage("GotGold", mTarget->getGold());
+			auto& man = Engine::get<ParticleManager>();
+			for (int i = 0; i < 4; ++i)
+			{
+				auto p = Particles::Gold;
+				float ang = (rand() % 360) * 180.f / M_PI;
+
+				p.Velocity = sf::Vector2f(std::cos(ang), std::sin(ang)) * 100.f;
+
+				man.addParticle(p, resp.payload.get<sf::Vector2f>());
 			}
 
 			mTarget = nullptr;

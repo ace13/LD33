@@ -18,11 +18,15 @@ public:
 
 	void damage(float dmg);
 
+	void markDeathHandled();
+	bool isDeathHandled() const;
+
 	bool isAlive() const;
 	float getXP() const;
 	int getGold() const;
 
 private:
+	bool mDeathHandled;
 	float mStrength, mHealth;
 	Game::Physical* mPhysical;
 	Path* mPath;

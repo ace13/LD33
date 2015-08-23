@@ -9,7 +9,7 @@
 #include <algorithm>
 
 Enemy::Enemy() : Kunlaboro::Component("Game.Enemy"),
-	mStrength(1), mHealth(1)
+	mStrength(1), mHealth(1), mDeathHandled(false)
 {
 
 }
@@ -73,6 +73,15 @@ void Enemy::damage(float dmg)
 	mHealth -= dmg / mStrength;
 }
 
+void Enemy::markDeathHandled()
+{
+	mDeathHandled = true;
+}
+bool Enemy::isDeathHandled() const
+{
+	return mDeathHandled;
+}
+
 bool Enemy::isAlive() const
 {
 	return mHealth > 0;
@@ -83,7 +92,7 @@ float Enemy::getXP() const
 }
 int Enemy::getGold() const
 {
-	return 10 + 10 * mStrength;
+	return 10 + 10 * (mStrength - 1);
 }
 
 void Enemy::tick(float dt)
