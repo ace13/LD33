@@ -1,12 +1,18 @@
 #include "GameScreen.hpp"
+#include "UI/TowerRadial.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 
+RadialMenu asdf;
+
 GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
 	mMouseDown(false), mTarget(nullptr)
 {
+	asdf.addEntry("Build Basic", "Resources/Plus.png");
+	asdf.addEntry("Build Cool", "Resources/Plus.png");
 
+	asdf.open();
 }
 void GameScreen::addedToEntity()
 {
@@ -15,6 +21,8 @@ void GameScreen::addedToEntity()
 }
 void GameScreen::event(sf::Event& ev)
 {
+	asdf.event(ev);
+
 	if (ev.type == sf::Event::MouseButtonPressed)
 	{
 		if (ev.mouseButton.button == sf::Mouse::Middle)
@@ -69,6 +77,8 @@ void GameScreen::event(sf::Event& ev)
 }
 void GameScreen::update(float dt)
 {
+	asdf.update(dt);
+
 	if (mMouseDown)
 	{
 		auto mousePos = sf::Mouse::getPosition(*(sf::RenderWindow*)mTarget);
@@ -93,4 +103,6 @@ void GameScreen::draw(sf::RenderTarget& target)
 	}
 
 	target.setView(mCamera);
+
+	asdf.draw(target);
 }

@@ -32,11 +32,11 @@ int main(int argc, char** argv)
 		mus.addTrack(4, std::move(buf));
 	}
 
-	//mus[0].setVolume(.5f, 4);
-	//mus[1].setVolume(.5f, 4);
-	//mus[2].setVolume(.5f, 4);
-	mus[3].setVolume(10.f, 5);
-	//mus[4].setVolume(15.f, 10);
+	//mus[0].setVolume(25.5f, 4);
+	//mus[1].setVolume(50.f, 4);
+	mus[2].setVolume(10.f, 10);
+	//mus[3].setVolume(50.f, 5);
+	//mus[4].setVolume(75.f, 10);
 
 	RegisterComponents(sys);
 
