@@ -39,7 +39,6 @@ private:
 	bool tilePassable(const sf::Vector2i& tile);
 
 	sf::Vector2u mLevelSize, mStart, mGoal;
-	int pickedX, pickedY;
 	std::vector<Tile> mTiles;
 	sf::Texture mTilesTexture;
 	bool mRebuildPath;

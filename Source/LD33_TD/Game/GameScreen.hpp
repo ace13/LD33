@@ -16,9 +16,10 @@ private:
 	void event(sf::Event& ev);
 	void update(float dt);
 	void draw(sf::RenderTarget&);
+	void drawUI(sf::RenderTarget&);
 
 	sf::Vector2i mMousePos;
-	bool mMouseDown;
+	bool mMouseDown, mMenu;
 	float mCurZoom;
 
 	sf::RenderTarget* mTarget;

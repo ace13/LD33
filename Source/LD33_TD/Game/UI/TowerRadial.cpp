@@ -17,22 +17,27 @@ RadialMenu::RadialMenu() :
 
 void RadialMenu::open()
 {
+	mSelected.clear();
 	mState = State_Opening;
-	mSizeEaser.start(0.f, 1.f, 2.5f);
-	mRotationEaser.start(0.f, 1.f, 1.5f);
+	mSizeEaser.setFunc(Tween::BackOut);
+	mSizeEaser.start(0.f, 1.f, 0.5f);
+	mRotationEaser.start(0.f, 1.f, 1.75f);
 }
 void RadialMenu::close()
 {
 	mState = State_Closing;
 	mSizeEaser.setFunc(Tween::QuinticIn);
-	mSizeEaser.start(1.f, 0.f, 0.75f);
+	mSizeEaser.start(1.f, 0.f, 0.25f);
 }
 
 void RadialMenu::addEntry(const std::string& name, const std::string& file)
 {
 	sf::Texture tex;
 	if (tex.loadFromFile(file))
+	{
+		tex.setSmooth(true);
 		mEntries.emplace_back(name, std::move(tex));
+	}
 }
 
 void RadialMenu::event(sf::Event& ev)
@@ -54,7 +59,7 @@ void RadialMenu::event(sf::Event& ev)
 
 	if (ev.type == sf::Event::MouseMoved)
 	{
-		mSelected = "";
+		mSelected.clear();
 		for (auto& pos : entryPos)
 		{
 			auto mPos = mTarget->mapPixelToCoords({ ev.mouseMove.x, ev.mouseMove.y }, mView);
@@ -68,6 +73,18 @@ void RadialMenu::event(sf::Event& ev)
 	}
 	else if (ev.type == sf::Event::MouseButtonReleased && ev.mouseButton.button == sf::Mouse::Left)
 	{
+		mSelected.clear();
+		for (auto& pos : entryPos)
+		{
+			auto mPos = mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mView);
+
+			if (VMath::Distance(mPos, pos.second) < 16 * 16)
+			{
+				mSelected = pos.first;
+				break;
+			}
+		}
+
 		close();
 	}
 }
@@ -100,6 +117,14 @@ void RadialMenu::update(float dt)
 	}
 
 }
+void RadialMenu::setPosition(const sf::Vector2f& pos)
+{
+	mPosition = pos;
+}
+const sf::Vector2f& RadialMenu::getPosition() const
+{
+	return mPosition;
+}
 void RadialMenu::draw(sf::RenderTarget& target)
 {
 	if (mState == State_Closed)
@@ -125,8 +150,8 @@ void RadialMenu::draw(sf::RenderTarget& target)
 
 	radial.setOutlineThickness(4);
 	radial.setOutlineColor({ 128, 128, 128 });
-	radial.setRadius(44);
-	radial.setOrigin(44, 44);
+	radial.setRadius(42);
+	radial.setOrigin(42, 42);
 
 	target.draw(radial);
 
@@ -170,8 +195,18 @@ void RadialMenu::draw(sf::RenderTarget& target)
 		if (entry.first == mSelected)
 		{
 			sf::Text popup(entry.first, sf::getDefaultFont());
+
 			popup.setPosition(sprite.getPosition() - sf::Vector2f(0, 32));
 			popup.setOrigin(0, popup.getLocalBounds().height);
+			popup.setColor(sf::Color::Black);
+
+			popup.move(-2, 0);
+			target.draw(popup);
+			popup.move(4, 0);
+			target.draw(popup);
+
+			popup.move(-2, 0);
+			popup.setColor(sf::Color::White);
 
 			target.draw(popup);
 		}
@@ -183,6 +218,10 @@ void RadialMenu::draw(sf::RenderTarget& target)
 bool RadialMenu::isClosed() const
 {
 	return mState == State_Closed;
+}
+bool RadialMenu::isOpened() const
+{
+	return mState == State_Open;
 }
 std::string RadialMenu::getSelection() const
 {

@@ -7,25 +7,26 @@
 RadialMenu asdf;
 
 GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
-	mMouseDown(false), mTarget(nullptr)
+	mMouseDown(false), mMenu(false), mTarget(nullptr)
 {
-	asdf.addEntry("Build Basic", "Resources/Plus.png");
-	asdf.addEntry("Build Cool", "Resources/Plus.png");
+	asdf.addEntry("Build Tower", "Resources/Plus.png");
 
-	asdf.open();
+	
 }
 void GameScreen::addedToEntity()
 {
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
+	requestMessage("LD33.DrawUI", [this](const Kunlaboro::Message& msg) { drawUI(*msg.payload.get<sf::RenderTarget*>()); });
 	changeRequestPriority("LD33.Draw", -9001);
 }
 void GameScreen::event(sf::Event& ev)
 {
-	asdf.event(ev);
+	if (!asdf.isClosed())
+		asdf.event(ev);
 
 	if (ev.type == sf::Event::MouseButtonPressed)
 	{
-		if (ev.mouseButton.button == sf::Mouse::Middle)
+		if (ev.mouseButton.button == sf::Mouse::Middle && asdf.isClosed())
 		{
 			mMouseDown = true;
 			mMousePos = sf::Mouse::getPosition(*(sf::RenderWindow*)mTarget);
@@ -35,13 +36,11 @@ void GameScreen::event(sf::Event& ev)
 	{
 		if (ev.mouseButton.button == sf::Mouse::Middle)
 			mMouseDown = false;
-		else if (ev.mouseButton.button == sf::Mouse::Left)
+		else if (ev.mouseButton.button == sf::Mouse::Left && asdf.isClosed())
 		{
-			auto eid = getEntitySystem()->createEntity("Game.Tower");
-
-			auto resp = sendGlobalQuestion("Level.CoordsToHex", mTarget->mapPixelToCoords(sf::Mouse::getPosition(*(sf::RenderWindow*)mTarget), mCamera));
-			resp = sendGlobalQuestion("Level.HexToCoords", resp.payload.get<sf::Vector2i>());
-			sendMessageToEntity(eid, "SetPosition", resp.payload.get<sf::Vector2f>());
+			mMenu = true;
+			asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
+			asdf.open();
 		}
 		else if (ev.mouseButton.button == sf::Mouse::XButton1)
 		{
@@ -78,6 +77,19 @@ void GameScreen::event(sf::Event& ev)
 void GameScreen::update(float dt)
 {
 	asdf.update(dt);
+	if (asdf.isClosed() && mMenu)
+	{
+		mMenu = false;
+
+		if (asdf.getSelection() == "Build Tower")
+		{
+			auto eid = getEntitySystem()->createEntity("Game.Tower");
+
+			auto resp = sendGlobalQuestion("Level.CoordsToHex", mTarget->mapPixelToCoords(sf::Vector2i(asdf.getPosition()), mCamera));
+			resp = sendGlobalQuestion("Level.HexToCoords", resp.payload.get<sf::Vector2i>());
+			sendMessageToEntity(eid, "SetPosition", resp.payload.get<sf::Vector2f>());
+		}
+	}
 
 	if (mMouseDown)
 	{
@@ -103,6 +115,9 @@ void GameScreen::draw(sf::RenderTarget& target)
 	}
 
 	target.setView(mCamera);
+}
 
+void GameScreen::drawUI(sf::RenderTarget& target)
+{
 	asdf.draw(target);
 }

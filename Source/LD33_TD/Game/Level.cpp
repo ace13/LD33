@@ -28,7 +28,7 @@ namespace std
 }
 
 Level::Level() : Kunlaboro::Component("Game.Level"),
-	pickedX(0), pickedY(0), mRebuildPath(true), mBestPath(new Path(Path::Invalid))
+	mRebuildPath(true), mBestPath(new Path(Path::Invalid))
 {
 	mTilesTexture.loadFromFile("Resources/Tiles.png");
 }
@@ -126,12 +126,6 @@ sf::Vector2i Level::coordsToHex(const sf::Vector2f& coords) const
 
 void Level::draw(sf::RenderTarget& target)
 { PROFILE
-	auto mouse = sf::Mouse::getPosition((sf::RenderWindow&)target);
-
-	auto picked = coordsToHex(target.mapPixelToCoords(mouse));
-	pickedX = picked.x;
-	pickedY = picked.y;
-
 	sf::VertexArray tiles(sf::Quads, mTiles.size());
 
 	for (int y = 0; y < mLevelSize.y; ++y)
@@ -184,33 +178,6 @@ inline void Level::drawTile(const sf::Vector2i& pos, Tile tile, sf::VertexArray&
 		sf::Color::White,
 		{ tx * 64.f, ty * 96.f + 96 }
 	});
-	
-	if (x == pickedX && y == pickedY)
-	{
-		tx = 0;
-		ty = 0;
-
-		tiles.append({
-			{ x * 49.f, y * 32.f + (x % 2 == 0) * 16 },
-			sf::Color::White,
-			{ tx * 64.f, ty * 96.f }
-		});
-		tiles.append({
-			{ x * 49.f + width, y * 32.f + (x % 2 == 0) * 16 },
-			sf::Color::White,
-			{ tx * 64.f + 64, ty * 96.f }
-		});
-		tiles.append({
-			{ x * 49.f + width, y * 32.f + (x % 2 == 0) * 16 + 96 },
-			sf::Color::White,
-			{ tx * 64.f + 64, ty * 96.f + 96 }
-		});
-		tiles.append({
-			{ x * 49.f, y * 32.f + (x % 2 == 0) * 16 + 96 },
-			sf::Color::White,
-			{ tx * 64.f, ty * 96.f + 96 }
-		});
-	}
 }
 
 Path Level::findPath(const sf::Vector2i& from, const sf::Vector2i& to) const

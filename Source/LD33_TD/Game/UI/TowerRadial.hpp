@@ -21,12 +21,14 @@ public:
 
 	void addEntry(const std::string& name, const std::string& file);
 	void setPosition(const sf::Vector2f&);
+	const sf::Vector2f& getPosition() const;
 
 	void event(sf::Event&);
 	void update(float dt);
 	void draw(sf::RenderTarget& target);
 
 	bool isClosed() const;
+	bool isOpened() const;
 	std::string getSelection() const;
 
 private:
