@@ -22,6 +22,10 @@ void Enemy::addedToEntity()
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
 	changeRequestPriority("LD33.Draw", 1);
 
+	requestMessage("SetStrength", [this](const Kunlaboro::Message& msg) {
+		mStrength = msg.payload.get<float>();
+	}, true);
+
 	requestMessage("Level.PathRebuilt", [this](const Kunlaboro::Message& msg) {
 		auto oldPos = *mPathIter;
 
@@ -88,11 +92,11 @@ bool Enemy::isAlive() const
 }
 float Enemy::getXP() const
 {
-	return 10 + 10 * mStrength;
+	return 5 * mStrength * mStrength;
 }
 int Enemy::getGold() const
 {
-	return 10 + int(10 * (mStrength - 1));
+	return 5 + int(10 * (mStrength - 1));
 }
 
 void Enemy::tick(float dt)

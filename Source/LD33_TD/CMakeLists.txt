@@ -10,6 +10,7 @@ SET(HEADERS
 	Game/Particles.hpp
 	Game/Path.hpp
 	Game/Tower.hpp
+	Game/Wave.hpp
 	Menu/MainMenu.hpp
 	Components.hpp
 	IntroScreen.hpp
@@ -25,6 +26,7 @@ SET(SOURCES
 	Game/Level.cpp
 	Game/Path.cpp
 	Game/Tower.cpp
+	Game/Wave.cpp
 	Menu/MainMenu.cpp
 	Components.cpp
 	IntroScreen.cpp

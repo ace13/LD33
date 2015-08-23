@@ -10,6 +10,12 @@ wggggg  gggw
 wggg  fmggfw
 wggg  fgggfw
 wgggg  ggffw
-wgggg  ggffw
-wgggg  mgfww
+wgggg  ggofw
+wgggg  mgoww
 wwwww   wwww
+5
+10 1 1 Wave 1
+25 1.25 1 Wave 2
+50 1.5 1 Wave 3
+100 0.5 0.1 Swarm Wave
+2 15 5 Boss Wave

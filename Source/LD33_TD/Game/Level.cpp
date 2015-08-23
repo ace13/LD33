@@ -1,5 +1,7 @@
 #include "Level.hpp"
 #include "Components.hpp"
+#include "Wave.hpp"
+
 #include <Base/Fonts.hpp>
 #include <Base/Profiling.hpp>
 #include <Base/VectorMath.hpp>
@@ -141,13 +143,35 @@ void Level::loadFromFile(const std::string& file)
 			case 'g': t = Tile_Grass; break;
 			case 'm': t = Tile_Mountain; break;
 			case 'f': t = Tile_Forest; break;
+			case 'o': t = Tile_Office; break;
 			}
 
 			mTiles[y * mLevelSize.x + x] = t;
 		}
 	}
 
+	auto& wm = *dynamic_cast<WaveManager*>(getEntitySystem()->getAllComponentsOnEntity(getOwnerId(), "Game.WaveManager").front());
+	unsigned int waves;
+	ifs >> waves;
+
+	for (unsigned int i = 0; i < waves; ++i)
+	{
+		unsigned int num;
+		float str, rate;
+		std::string name(256, 0);
+
+		ifs >> num >> str >> rate;
+		ifs.getline(&name.front(), 256);
+
+		wm.addWave({ num, str, rate, name });
+	}
+
 	mRebuildPath = true;
+}
+
+const sf::Vector2u& Level::getSize() const
+{
+	return mLevelSize;
 }
 
 sf::Vector2f Level::hexToCoords(const sf::Vector2i& hex) const

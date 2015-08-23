@@ -1,4 +1,5 @@
 #include "Components.hpp"
+#include "Game/Level.hpp"
 
 #include <Base/Engine.hpp>
 #include <Base/Music.hpp>
@@ -49,10 +50,19 @@ int main(int argc, char** argv)
 	win.setFramerateLimit(250);
 #endif
 
-	auto eid = sys.createEntity();
-	sys.addComponent(eid, "Game.GameScreen");
-	sys.addComponent(eid, "Game.Level");
-	sys.sendLocalMessage(eid, "LoadLevel", std::string("Resources/Level1.txt"));
+	auto eid = sys.createEntity("Game.");
+
+	Kunlaboro::Message msg;
+	msg.payload = std::string("Resources/Level1.txt");
+	sys.sendLocalMessage(eid, Kunlaboro::hash::hash_func1::hash("LoadLevel"), msg);
+
+	if (msg.handled)
+	{
+		auto& level = *dynamic_cast<Level*>(msg.sender);
+
+		auto size = sf::Vector2f(level.getSize()) * 24.f;
+		sys.sendGlobalMessage("SetCamera", size);
+	}
 
 	eng.run();
 

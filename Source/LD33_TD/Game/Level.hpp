@@ -19,6 +19,7 @@ public:
 		Tile_Grass,
 		Tile_Mountain,
 		Tile_Forest,
+		Tile_Office
 	};
 
 	Level();
@@ -30,6 +31,8 @@ public:
 	Path findPath(const sf::Vector2i& from, const sf::Vector2i& to) const;
 
 	void draw(sf::RenderTarget& target);
+
+	const sf::Vector2u& getSize() const;
 
 	sf::Vector2f hexToCoords(const sf::Vector2i& hex) const;
 	sf::Vector2i coordsToHex(const sf::Vector2f& coords) const;

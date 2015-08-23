@@ -84,7 +84,7 @@ void Tower::tick(float dt)
 			return;
 		}
 
-		mTarget->damage(dt / 2.f * mLevel);
+		mTarget->damage(dt / 2.f * (1 + (mLevel-1)/10.f));
 		if (!mTarget->isAlive() && !mTarget->isDeathHandled())
 		{
 			mTarget->markDeathHandled();

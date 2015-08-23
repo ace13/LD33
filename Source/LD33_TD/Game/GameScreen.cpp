@@ -25,6 +25,10 @@ void GameScreen::addedToEntity()
 		goldValue += msg.payload.get<int>();
 	});
 
+	requestMessage("SetCamera", [this](const Kunlaboro::Message& msg) {
+		mCamera.setCenter(msg.payload.get<sf::Vector2f>());
+	});
+
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
 	requestMessage("LD33.DrawUI", [this](const Kunlaboro::Message& msg) { drawUI(*msg.payload.get<sf::RenderTarget*>()); });
 	changeRequestPriority("LD33.Draw", -9001);
@@ -92,11 +96,6 @@ void GameScreen::event(sf::Event& ev)
 				}
 			}
 		}
-		else if (ev.mouseButton.button == sf::Mouse::XButton1)
-		{
-			getEntitySystem()->createEntity("Game.Enemy");
-
-		}
 	}
 	else if (ev.type == sf::Event::MouseWheelMoved && asdf.isClosed())
 	{
@@ -154,6 +153,10 @@ void GameScreen::update(float dt)
 
 				sendMessageToEntity(eid, "Define", &Towers::BasicTower::Instance);
 			}
+			else if (asdf.getSelection() == "Begin Wave")
+			{
+				sendMessage("NextWave");
+			}
 		}
 	}
 
@@ -175,8 +178,10 @@ void GameScreen::draw(sf::RenderTarget& target)
 		requestMessage("LD33.Update", [this](const Kunlaboro::Message& msg) { update(msg.payload.get<float>()); });
 		requestMessage("LD33.Event", [this](const Kunlaboro::Message& msg) { event(*msg.payload.get<sf::Event*>()); });
 
+		auto old = mCamera;
 		mCamera = target.getView();
 		mCamera.zoom(0.25);
+		mCamera.setCenter(old.getCenter());
 		mCurZoom = 0.25;
 	}
 
