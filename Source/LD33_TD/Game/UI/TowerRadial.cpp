@@ -10,7 +10,7 @@
 #include <SFML/Window/Event.hpp>
 
 RadialMenu::RadialMenu() :
-	mState(State_Closed), mSizeEaser(Tween::BackOut), mRotationEaser(Tween::BounceOut)
+	mState(State_Closed), mSizeEaser(), mRotationEaser()
 {
 
 }
@@ -19,15 +19,22 @@ void RadialMenu::open()
 {
 	mSelected.clear();
 	mState = State_Opening;
+
 	mSizeEaser.setFunc(Tween::BackOut);
 	mSizeEaser.start(0.f, 1.f, 0.5f);
-	mRotationEaser.start(0.f, 1.f, 0.95f);
+
+	mRotationEaser.setFunc(Tween::BounceOut);
+	mRotationEaser.start(0.f, 1.f, 1.f);
+	mRotationEaser.update(0.2f);
 }
 void RadialMenu::close()
 {
 	mState = State_Closing;
 	mSizeEaser.setFunc(Tween::QuinticIn);
 	mSizeEaser.start(1.f, 0.f, 0.25f);
+
+	mRotationEaser.setFunc(Tween::QuinticIn);
+	mRotationEaser.start(1.0, 0.f, 0.25f);
 }
 
 void RadialMenu::clearEntries()

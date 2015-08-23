@@ -26,8 +26,21 @@ void Game::Physical::addedToEntity()
 		if (!Blocking)
 			return;
 
-		auto vec = msg.payload.get<std::vector<Physical*>*>();
-		vec->push_back(this);
+		if (msg.payload.is<std::tuple<std::vector<Physical*>*, sf::Vector2f, float>>())
+		{
+			auto tuple = msg.payload.get<std::tuple<std::vector<Physical*>*, sf::Vector2f, float>>();
+			auto vec = std::get<0>(tuple);
+
+			if (VMath::DistanceSqrt(std::get<1>(tuple), Position) < std::get<2>(tuple))
+			{
+				vec->push_back(this);
+			}
+		}
+		else
+		{
+			auto vec = msg.payload.get<std::vector<Physical*>*>();
+			vec->push_back(this);
+		}
 	});
 
 	/// \FIXME Move to a PhysicalManager, with a single Tick function.

@@ -20,6 +20,7 @@ private:
 
 	sf::Vector2i mMousePos;
 	bool mMouseDown, mMenu;
+	Kunlaboro::EntityId mSelectedTower;
 	float mCurZoom;
 
 	sf::RenderTarget* mTarget;

@@ -7,6 +7,7 @@ SET(HEADERS
 	Game/Enemy.hpp
 	Game/GameScreen.hpp
 	Game/Level.hpp
+	Game/Particles.hpp
 	Game/Path.hpp
 	Game/Tower.hpp
 	Menu/MainMenu.hpp

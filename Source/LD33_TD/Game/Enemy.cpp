@@ -9,7 +9,7 @@
 #include <algorithm>
 
 Enemy::Enemy() : Kunlaboro::Component("Game.Enemy"),
-	mStrength(0), mHealth(1)
+	mStrength(1), mHealth(1)
 {
 
 }
@@ -70,18 +70,33 @@ void Enemy::addedToEntity()
 
 void Enemy::damage(float dmg)
 {
-	mHealth -= dmg;
+	mHealth -= dmg / mStrength;
 }
 
 bool Enemy::isAlive() const
 {
 	return mHealth > 0;
 }
+float Enemy::getXP() const
+{
+	return 10 + 10 * mStrength;
+}
+int Enemy::getGold() const
+{
+	return 10 + 10 * mStrength;
+}
 
 void Enemy::tick(float dt)
 { PROFILE;
-	if (mPathIter == mPath->end() || mHealth <= 0)
+	if (mHealth <= 0)
 	{
+		getEntitySystem()->destroyEntity(getOwnerId());
+		return;
+	}
+	
+	if (mPathIter == mPath->end())
+	{
+		sendGlobalMessage("Enemy.ReachedGoal");
 		getEntitySystem()->destroyEntity(getOwnerId());
 		return;
 	}

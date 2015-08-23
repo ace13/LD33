@@ -19,6 +19,8 @@ public:
 	void damage(float dmg);
 
 	bool isAlive() const;
+	float getXP() const;
+	int getGold() const;
 
 private:
 	float mStrength, mHealth;

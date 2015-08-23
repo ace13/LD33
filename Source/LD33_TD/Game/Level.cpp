@@ -54,6 +54,7 @@ void Level::addedToEntity()
 		}
 	});
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
+	changeRequestPriority("LD33.Draw", -1);
 
 	requestMessage("Level.Valid", [this](Kunlaboro::Message& msg) {
 		sf::Vector2i hex;
@@ -64,12 +65,30 @@ void Level::addedToEntity()
 		else
 			return;
 
+		std::vector<sf::Vector2i> blocked;
+		{
+			std::vector<Game::Physical*> blockers;
+			sendGlobalMessage("Game.Physical.Blocking", &blockers);
+			for (auto& it : blockers)
+				blocked.push_back(coordsToHex(it->Position));
+		}
+
 		if (hex.x < 0 || hex.y < 0 || hex.x >= mLevelSize.x || hex.y >= mLevelSize.y)
 			msg.handle(false);
 		else if (mTiles[hex.x + hex.y * mLevelSize.x] != Tile_Grass)
 			msg.handle(false);
 		else
-			msg.handle(true);
+		{
+			bool b = false;
+			for (auto& i : blocked)
+				if (i == hex)
+				{
+					b = true;
+					break;
+				}
+
+			msg.handle(!b);
+		}
 	});
 	requestMessage("Level.HexToCoords", [this](Kunlaboro::Message& msg) {
 		msg.handle(hexToCoords(msg.payload.get<sf::Vector2i>()));

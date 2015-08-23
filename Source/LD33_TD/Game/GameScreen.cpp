@@ -1,5 +1,8 @@
 #include "GameScreen.hpp"
 #include "UI/TowerRadial.hpp"
+#include "Components.hpp"
+
+#include <Base/VectorMath.hpp>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
@@ -7,15 +10,8 @@
 RadialMenu asdf;
 
 GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
-	mMouseDown(false), mMenu(false), mTarget(nullptr)
+	mMouseDown(false), mMenu(false), mSelectedTower(0), mTarget(nullptr)
 {
-	asdf.addEntry("Build Tower", "Resources/Plus.png");
-	asdf.addEntry("Build Tower2", "Resources/Plus.png");
-	asdf.addEntry("Build Tower3", "Resources/Plus.png");
-	asdf.addEntry("Build Tower4", "Resources/Plus.png");
-	asdf.addEntry("Build Tower5", "Resources/Plus.png");
-	asdf.addEntry("Build Tower6", "Resources/Plus.png");
-	asdf.addEntry("Build Tower7", "Resources/Plus.png");
 }
 void GameScreen::addedToEntity()
 {
@@ -47,8 +43,35 @@ void GameScreen::event(sf::Event& ev)
 			{
 				mMenu = true;
 
+				asdf.clearEntries();
+				asdf.addEntry("Build Tower", "Resources/Plus.png");
+
 				asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
 				asdf.open();
+			}
+			else if (resp.handled)
+			{
+				auto mPos = mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera);
+				std::vector<Game::Physical*> blockers;
+				sendGlobalMessage("Game.Physical.Blocking", &blockers);
+				for (auto& it : blockers)
+				{
+					if (VMath::Distance(it->Position, mPos) < it->Radius * it->Radius)
+					{
+						mMenu = true;
+						mSelectedTower = it->getOwnerId();
+
+						asdf.clearEntries();
+						asdf.addEntry("Upgrade", "Resources/Plus.png");
+						asdf.addEntry("Sell", "Resources/Plus.png");
+						asdf.addEntry("Do something else", "Resources/Plus.png");
+
+						asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
+						asdf.open();
+
+						break;
+					}
+				}
 			}
 		}
 		else if (ev.mouseButton.button == sf::Mouse::XButton1)
@@ -90,13 +113,25 @@ void GameScreen::update(float dt)
 	{
 		mMenu = false;
 
-		if (asdf.getSelection() == "Build Tower")
+		if (mSelectedTower != 0)
 		{
-			auto eid = getEntitySystem()->createEntity("Game.Tower");
+			if (asdf.getSelection() == "Sell")
+			{
+				getEntitySystem()->destroyEntity(mSelectedTower);
+			}
 
-			auto resp = sendGlobalQuestion("Level.CoordsToHex", mTarget->mapPixelToCoords(sf::Vector2i(asdf.getPosition()), mCamera));
-			resp = sendGlobalQuestion("Level.HexToCoords", resp.payload.get<sf::Vector2i>());
-			sendMessageToEntity(eid, "SetPosition", resp.payload.get<sf::Vector2f>());
+			mSelectedTower = 0;
+		}
+		else
+		{
+			if (asdf.getSelection() == "Build Tower")
+			{
+				auto eid = getEntitySystem()->createEntity("Game.Tower");
+
+				auto resp = sendGlobalQuestion("Level.CoordsToHex", mTarget->mapPixelToCoords(sf::Vector2i(asdf.getPosition()), mCamera));
+				resp = sendGlobalQuestion("Level.HexToCoords", resp.payload.get<sf::Vector2i>());
+				sendMessageToEntity(eid, "SetPosition", resp.payload.get<sf::Vector2f>());
+			}
 		}
 	}
 
