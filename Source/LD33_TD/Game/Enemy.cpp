@@ -24,6 +24,7 @@ void Enemy::addedToEntity()
 
 	requestMessage("SetStrength", [this](const Kunlaboro::Message& msg) {
 		mStrength = msg.payload.get<float>();
+		mHealth = 10 + mStrength * 2;
 	}, true);
 
 	requestMessage("Level.PathRebuilt", [this](const Kunlaboro::Message& msg) {
@@ -59,7 +60,7 @@ void Enemy::addedToEntity()
 			}
 
 			if (it != mPath->end())
-				it++;
+				it+=2;
 		}
 	});
 
@@ -103,6 +104,9 @@ float Enemy::getXP() const
 }
 int Enemy::getGold() const
 {
+	if (mStrength < 1)
+		return 0;
+
 	return 5 + int(10 * (mStrength - 1));
 }
 
@@ -122,7 +126,9 @@ void Enemy::tick(float dt)
 	}
 
 	auto resp = sendGlobalQuestion("Level.HexToCoords", *mPathIter);
-	mPhysical->Velocity = VMath::GetNormalized(resp.payload.get<sf::Vector2f>() - mPhysical->Position) * 64.f;
+	sf::Vector2f target = VMath::GetNormalized(resp.payload.get<sf::Vector2f>() - mPhysical->Position) * 64.f;
+
+	mPhysical->Velocity += (target - mPhysical->Velocity) * (dt * 5);
 
 	if (VMath::Distance(mPhysical->Position, resp.payload.get<sf::Vector2f>()) < 8 * 8)
 	{
@@ -132,8 +138,10 @@ void Enemy::tick(float dt)
 
 void Enemy::draw(sf::RenderTarget& target)
 {
+	float maxHealth = 10 + mStrength * 2;
+
 	sf::CircleShape circ(mPhysical->Radius);
-	circ.setFillColor({ sf::Uint8(mHealth * 255), 0, 0 });
+	circ.setFillColor({ sf::Uint8((mHealth / maxHealth) * 255), 0, 0 });
 
 	circ.setOrigin(mPhysical->Radius, mPhysical->Radius);
 	circ.setPosition(mPhysical->Position);

@@ -19,4 +19,11 @@ namespace Particles
 		{ 179, 170, 0, 0 },
 		{ 0, 100, 8, 8 }
 	};
+	const ParticleManager::Particle Water{
+		ParticleManager::Particle::Topmost, 0.25f, 0.75f, 1.f, ParticleManager::ANGLE_RANDOM, 1.f,
+		{ 0, 0 }, { 0, 0 },
+		{ 0, 64, 255, 164 },
+		{ 190, 255, 255, 25 },
+		{ 0, 0, 8, 8 }
+	};
 }

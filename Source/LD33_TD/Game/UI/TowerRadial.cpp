@@ -40,6 +40,7 @@ void RadialMenu::close()
 void RadialMenu::clearEntries()
 {
 	mEntries.clear();
+	mSelected.clear();
 }
 void RadialMenu::addEntry(const std::string& name, const std::string& file)
 {

@@ -69,7 +69,10 @@ void Tower::tick(float dt)
 		}
 	}
 
-	if (mTarget)
+	
+	mCooldown -= dt;
+
+	if (mCooldown <= 0 && mTarget)
 	{
 		if (!getEntitySystem()->isValid(mTarget->getOwnerId()))
 		{
@@ -78,13 +81,17 @@ void Tower::tick(float dt)
 		}
 
 		auto resp = sendQuestionToEntity(mTarget->getOwnerId(), "GetPosition");
-		if (!resp.handled || VMath::DistanceSqrt(mPhysical->Position, resp.payload.get<sf::Vector2f>()) > 64.f)
+		auto& enemy = *(Game::Physical*)resp.sender;
+		if (!resp.handled || VMath::DistanceSqrt(mPhysical->Position, enemy.Position) > 64.f)
 		{
 			mTarget = nullptr;
 			return;
 		}
 
-		mTarget->damage(dt / 2.f * (1 + (mLevel-1)/10.f));
+		mCooldown = mDefinition->getFireRate(mLevel);
+		mDefinition->fire(*mPhysical, enemy);
+		mTarget->damage(mDefinition->getDamage(mLevel));
+
 		if (!mTarget->isAlive() && !mTarget->isDeathHandled())
 		{
 			mTarget->markDeathHandled();

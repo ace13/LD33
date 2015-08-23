@@ -73,6 +73,9 @@ void Level::addedToEntity()
 			sendGlobalMessage("Game.Physical.Blocking", &blockers);
 			for (auto& it : blockers)
 				blocked.push_back(coordsToHex(it->Position));
+
+			blocked.push_back(sf::Vector2i(mStart));
+			blocked.push_back(sf::Vector2i(mGoal));
 		}
 
 		if (hex.x < 0 || hex.y < 0 || hex.x >= mLevelSize.x || hex.y >= mLevelSize.y)
@@ -119,6 +122,10 @@ void Level::loadFromFile(const std::string& file)
 
 	if (!ifs || ifs.eof())
 		return;
+
+	std::string title, subtitle;
+	std::getline(ifs, title);
+	std::getline(ifs, subtitle);
 
 	ifs >> mLevelSize.x >> mLevelSize.y
 		>> mStart.x >> mStart.y

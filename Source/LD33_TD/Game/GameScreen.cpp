@@ -13,12 +13,14 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
+
 /// \FIXME TOO MUCH GLOBAL, VOLVO PLZ NERF
 RadialMenu asdf;
-int goldValue = 100;
+int goldValue = 100, life = 100;
 Profiler::TimePoint mouseDown;
 Easer waveEaser(Tween::QuadraticIn);
 WaveManager* wMan;
+
 
 GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
 	mMouseDown(false), mMenu(false), mSelectedTower(0), mTarget(nullptr)
@@ -78,7 +80,7 @@ void GameScreen::event(sf::Event& ev)
 					mMenu = true;
 
 					if (goldValue >= 25)
-						asdf.addEntry("Build Tower (25G)", "Resources/Plus.png");
+						asdf.addEntry("Water Pistol (25G)", "Resources/Hammer.png");
 				}
 				else if (resp.handled && !resp.payload.get<bool>())
 				{
@@ -92,8 +94,10 @@ void GameScreen::event(sf::Event& ev)
 							mMenu = true;
 							mSelectedTower = it->getOwnerId();
 
-							asdf.addEntry("Upgrade", "Resources/Plus.png");
-							asdf.addEntry("Sell", "Resources/Plus.png");
+							asdf.addEntry("Sell", "Resources/Coins.png");
+
+							if (goldValue >= 75)
+								asdf.addEntry("Firehose Upgrade (75G)", "Resources/Plus.png");
 							asdf.addEntry("Do something else", "Resources/Plus.png");
 
 							asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
@@ -156,12 +160,17 @@ void GameScreen::update(float dt)
 				sendMessageToEntity(mSelectedTower, "Sold");
 				getEntitySystem()->destroyEntity(mSelectedTower);
 			}
+			else if (asdf.getSelection().substr(0,8) == "Firehose")
+			{
+				goldValue -= 75;
+				sendMessageToEntity(mSelectedTower, "Define", &Towers::Firehose::Instance);
+			}
 
 			mSelectedTower = 0;
 		}
 		else
 		{
-			if (asdf.getSelection() == "Build Tower (25G)")
+			if (asdf.getSelection().substr(0,12) == "Water Pistol")
 			{
 				goldValue -= 25;
 				auto eid = getEntitySystem()->createEntity("Game.Tower");
@@ -170,7 +179,7 @@ void GameScreen::update(float dt)
 				resp = sendGlobalQuestion("Level.HexToCoords", resp.payload.get<sf::Vector2i>());
 				sendMessageToEntity(eid, "SetPosition", resp.payload.get<sf::Vector2f>());
 
-				sendMessageToEntity(eid, "Define", &Towers::BasicTower::Instance);
+				sendMessageToEntity(eid, "Define", &Towers::Basic::Instance);
 			}
 		}
 	}
@@ -212,7 +221,7 @@ void GameScreen::drawUI(sf::RenderTarget& target)
 {
 	asdf.draw(target);
 
-	sf::Text gold("Gold: ", sf::getDefaultFont());
+	sf::Text gold("Gold: ", sf::getDefaultFont(), 20);
 	gold.setPosition(10, target.getView().getSize().y - gold.getLocalBounds().height * 2);
 
 	target.draw(gold);
@@ -220,6 +229,17 @@ void GameScreen::drawUI(sf::RenderTarget& target)
 	gold.move(gold.getLocalBounds().width, 0);
 	gold.setString(std::to_string(goldValue));
 	gold.setColor({ 255, 255, 0 });
+
+	target.draw(gold);
+
+	gold.move(gold.getLocalBounds().width + 24, 0);
+	gold.setString("Lives: ");
+	gold.setColor(sf::Color::White);
+	target.draw(gold);
+
+	gold.move(gold.getLocalBounds().width, 0);
+	gold.setString(std::to_string(life));
+
 
 	target.draw(gold);
 
