@@ -27,8 +27,27 @@ void Tower::addedToEntity()
 
 	requestMessage("LD33.Tick", [this](const Kunlaboro::Message& msg) { tick(msg.payload.get<float>()); });
 	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
+
+
 	requestMessage("GotXP", [this](const Kunlaboro::Message& msg) {
 		mXP += msg.payload.get<float>();
+	}, true);
+	requestMessage("Sold", [this](const Kunlaboro::Message& msg) {
+		sendGlobalMessage("GotGold", int(mDefinition->getPrice() * 0.75f));
+
+		auto& man = Engine::get<ParticleManager>();
+		for (int i = 0; i < 8; ++i)
+		{
+			auto p = Particles::Gold;
+			float ang = (rand() % 360) * 180.f / M_PI;
+
+			p.Velocity = sf::Vector2f(std::cos(ang), std::sin(ang)) * 100.f;
+
+			man.addParticle(p, mPhysical->Position);
+		}
+	}, true);
+	requestMessage("Define", [this](const Kunlaboro::Message& msg) {
+		mDefinition = msg.payload.get<const TowerDefinition*>();
 	}, true);
 
 	changeRequestPriority("LD33.Draw", 1);
@@ -38,26 +57,7 @@ void Tower::tick(float dt)
 { PROFILE;
 	float nextLevel = 100 + mLevel * 100;
 	if (mXP >= nextLevel)
-	{
-		mLevel += 1;
-		mXP -= nextLevel;
-
-		auto& man = Engine::get<ParticleManager>();
-		for (int i = 0; i < 360; ++i)
-		{
-			auto p = Particles::LevelUp;
-			float ang = i * 180.f / M_PI;
-
-			sf::Vector2f dir(std::cos(ang), std::sin(ang));
-
-			p.Angle = ang;
-			p.Velocity = dir * 100.f;
-			p.Gravity = dir * -100.f / p.Duration;
-
-			man.addParticle(p, mPhysical->Position);
-		}
-
-	}
+		levelUp(nextLevel);
 
 	if (!mTarget)
 	{
@@ -130,6 +130,11 @@ void Tower::draw(sf::RenderTarget& target)
 	target.draw(circ);
 }
 
+const TowerDefinition& Tower::getDefinition() const
+{
+	return *mDefinition;
+}
+
 void Tower::levelUp(float cost)
 {
 	mLevel++;
@@ -140,4 +145,19 @@ void Tower::levelUp(float cost)
 		mXP -= cost;
 
 	sendMessage("LeveledUp");
+
+	auto& man = Engine::get<ParticleManager>();
+	for (int i = 0; i < 360; ++i)
+	{
+		auto p = Particles::LevelUp;
+		float ang = i * 180.f / M_PI;
+
+		sf::Vector2f dir(std::cos(ang), std::sin(ang));
+
+		p.Angle = ang;
+		p.Velocity = dir * 100.f;
+		p.Gravity = dir * -100.f / p.Duration;
+
+		man.addParticle(p, mPhysical->Position);
+	}
 }

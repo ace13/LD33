@@ -17,11 +17,13 @@ public:
 	void tick(float dt);
 	void draw(sf::RenderTarget&);
 
+	const TowerDefinition& getDefinition() const;
+
 protected:
 	void levelUp(float cost = -1);
 
 private:
-	TowerDefinition* mDefinition;
+	const TowerDefinition* mDefinition;
 	Game::Physical* mPhysical;
 	Enemy* mTarget;
 

@@ -1,8 +1,10 @@
 #include "GameScreen.hpp"
-#include "UI/TowerRadial.hpp"
 #include "Components.hpp"
+#include "Towers/Basic.hpp"
+#include "UI/TowerRadial.hpp"
 
 #include <Base/Fonts.hpp>
+#include <Base/Profiling.hpp>
 #include <Base/VectorMath.hpp>
 
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -11,6 +13,7 @@
 
 RadialMenu asdf;
 int goldValue = 100;
+Profiler::TimePoint mouseDown;
 
 GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
 	mMouseDown(false), mMenu(false), mSelectedTower(0), mTarget(nullptr)
@@ -33,54 +36,58 @@ void GameScreen::event(sf::Event& ev)
 
 	if (ev.type == sf::Event::MouseButtonPressed)
 	{
-		if (ev.mouseButton.button == sf::Mouse::Middle && asdf.isClosed())
+		if (ev.mouseButton.button == sf::Mouse::Left && asdf.isClosed())
 		{
+			mouseDown = Profiler::Clock::now();
 			mMouseDown = true;
 			mMousePos = sf::Mouse::getPosition(*(sf::RenderWindow*)mTarget);
 		}
 	}
 	else if (ev.type == sf::Event::MouseButtonReleased)
 	{
-		if (ev.mouseButton.button == sf::Mouse::Middle)
-			mMouseDown = false;
-		else if (ev.mouseButton.button == sf::Mouse::Left && asdf.isClosed())
+		if (ev.mouseButton.button == sf::Mouse::Left && asdf.isClosed())
 		{
-			auto resp = sendGlobalQuestion("Level.Valid", mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera));
-			if (resp.handled && resp.payload.get<bool>())
+			mMouseDown = false;
+			auto now = Profiler::Clock::now();
+			if ((now - mouseDown) < std::chrono::duration<int, std::milli>(150))
 			{
-				mMenu = true;
-
-				asdf.clearEntries();
-				
-				asdf.addEntry("Begin Wave", "Resources/Start.png");
-
-				if (goldValue >= 25)
-					asdf.addEntry("Build Tower (25G)", "Resources/Plus.png");
-
-				asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
-				asdf.open();
-			}
-			else if (resp.handled)
-			{
-				auto mPos = mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera);
-				std::vector<Game::Physical*> blockers;
-				sendGlobalMessage("Game.Physical.Blocking", &blockers);
-				for (auto& it : blockers)
+				auto resp = sendGlobalQuestion("Level.Valid", mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera));
+				if (resp.handled && resp.payload.get<bool>())
 				{
-					if (VMath::Distance(it->Position, mPos) < it->Radius * it->Radius)
+					mMenu = true;
+
+					asdf.clearEntries();
+
+					asdf.addEntry("Begin Wave", "Resources/Start.png");
+
+					if (goldValue >= 25)
+						asdf.addEntry("Build Tower (25G)", "Resources/Plus.png");
+
+					asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
+					asdf.open();
+				}
+				else if (resp.handled && !resp.payload.get<bool>())
+				{
+					auto mPos = mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera);
+					std::vector<Game::Physical*> blockers;
+					sendGlobalMessage("Game.Physical.Blocking", &blockers);
+					for (auto& it : blockers)
 					{
-						mMenu = true;
-						mSelectedTower = it->getOwnerId();
+						if (VMath::Distance(it->Position, mPos) < it->Radius * it->Radius)
+						{
+							mMenu = true;
+							mSelectedTower = it->getOwnerId();
 
-						asdf.clearEntries();
-						asdf.addEntry("Upgrade", "Resources/Plus.png");
-						asdf.addEntry("Sell", "Resources/Plus.png");
-						asdf.addEntry("Do something else", "Resources/Plus.png");
+							asdf.clearEntries();
+							asdf.addEntry("Upgrade", "Resources/Plus.png");
+							asdf.addEntry("Sell", "Resources/Plus.png");
+							asdf.addEntry("Do something else", "Resources/Plus.png");
 
-						asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
-						asdf.open();
+							asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
+							asdf.open();
 
-						break;
+							break;
+						}
 					}
 				}
 			}
@@ -128,6 +135,7 @@ void GameScreen::update(float dt)
 		{
 			if (asdf.getSelection() == "Sell")
 			{
+				sendMessageToEntity(mSelectedTower, "Sold");
 				getEntitySystem()->destroyEntity(mSelectedTower);
 			}
 
@@ -143,6 +151,8 @@ void GameScreen::update(float dt)
 				auto resp = sendGlobalQuestion("Level.CoordsToHex", mTarget->mapPixelToCoords(sf::Vector2i(asdf.getPosition()), mCamera));
 				resp = sendGlobalQuestion("Level.HexToCoords", resp.payload.get<sf::Vector2i>());
 				sendMessageToEntity(eid, "SetPosition", resp.payload.get<sf::Vector2f>());
+
+				sendMessageToEntity(eid, "Define", &Towers::BasicTower::Instance);
 			}
 		}
 	}

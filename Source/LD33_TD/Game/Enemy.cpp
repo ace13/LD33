@@ -92,7 +92,7 @@ float Enemy::getXP() const
 }
 int Enemy::getGold() const
 {
-	return 10 + 10 * (mStrength - 1);
+	return 10 + int(10 * (mStrength - 1));
 }
 
 void Enemy::tick(float dt)
