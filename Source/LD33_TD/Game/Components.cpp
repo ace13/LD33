@@ -17,10 +17,20 @@ void Game::Physical::addedToEntity()
 	requestMessage("SetRadius", [this](const Kunlaboro::Message& msg) { Radius = msg.payload.get<float>(); }, true);
 
 	requestMessage("Game.Physical.Find", [this](Kunlaboro::Message& msg) {
-		auto question = msg.payload.get<std::tuple<sf::Vector2f, float>>();
+		if (msg.payload.is<std::tuple<sf::Vector2f, float>>())
+		{
+			auto question = msg.payload.get<std::tuple<sf::Vector2f, float>>();
 
-		if (!Blocking && VMath::DistanceSqrt(Position, std::get<0>(question)) < std::get<1>(question))
-			msg.handle(Position);
+			if (!Blocking && VMath::DistanceSqrt(Position, std::get<0>(question)) < std::get<1>(question))
+				msg.handle(Position);
+		}
+		else if (msg.payload.is<std::vector<Physical*>*>())
+		{
+			auto vec = msg.payload.get<std::vector<Physical*>*>();
+			if (!Blocking)
+				vec->push_back(this);
+		}
+
 	});
 	requestMessage("Game.Physical.Blocking", [this](const Kunlaboro::Message& msg){
 		if (!Blocking)

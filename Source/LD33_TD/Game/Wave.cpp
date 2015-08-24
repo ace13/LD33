@@ -21,6 +21,12 @@ void WaveManager::addedToEntity()
 	}, true);
 }
 
+void WaveManager::clear()
+{
+	mWaves.clear();
+	mNextWave = mCurWave = mWaves.end();
+}
+
 void WaveManager::addWave(const Wave& wave)
 {
 	mWaves.push_back(wave);

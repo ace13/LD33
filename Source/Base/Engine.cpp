@@ -157,7 +157,7 @@ void Engine::run()
 			{ PROFILE_BLOCK("UI");
 				mWindow->setView(uiView);
 				mSystem->sendGlobalMessage("LD33.DrawUI", (sf::RenderTarget*)mWindow);
-				mWindow->draw(profilingText);
+				//mWindow->draw(profilingText);
 			}
 
 			PROFILE_CALL("Display", mWindow->display());

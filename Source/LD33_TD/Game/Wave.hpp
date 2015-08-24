@@ -16,12 +16,14 @@ public:
 
 		static const Wave None;
 		inline bool operator==(const Wave& o) const { return Name == o.Name; }
+		inline bool operator!=(const Wave& o) const { return Name != o.Name; }
 	};
 
 	WaveManager();
 	
 	void addedToEntity();
 
+	void clear();
 	void addWave(const Wave& wave);
 	void nextWave();
 

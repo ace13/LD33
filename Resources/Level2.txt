@@ -1,20 +1,23 @@
+More complaints
+Customers shot with water
+"No complaints" say EA!
 12 12
-1 10
-8 10
+4 1
+2 10
 wwwwwwwwwwww
 wwmmgggggggw
-wwmggggggggw
-wmmggggg ggw
-wmggggg gggw
-wggggg  gggw
-wggg  fmggfw
-wggg  fgggfw
-wgggg  ggffw
-wgggg  ggofw
-wgggg  mgoww
-wwwww   wwww
-5
-10 1 1 Wave 1
+wwmggmgggggw
+wmmgggmggggw
+  gggg ggggw
+ ggmgg ggggw
+ ggmgg mggfw
+ ggmggggggfw
+ ggggggmgffw
+wogggmmgggfw
+woggggggggww
+wwwwwwwwwwww
+6
+20 1 0.9 Wave 1
 25 1.5 0.9 Wave 2
 50 3 0.75 Wave 3
 100 0.9 0.1 Swarm Wave

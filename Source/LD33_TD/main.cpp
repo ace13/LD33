@@ -6,10 +6,14 @@
 #include <Kunlaboro/EntitySystem.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+#include <cstdlib>
+
 const float Engine::TICK_RATE = 1.f/20.f;
 
 int main(int argc, char** argv)
 {
+	srand(time(nullptr));
+
 	Engine eng;
 	Kunlaboro::EntitySystem sys;
 	sf::RenderWindow win;
@@ -44,7 +48,7 @@ int main(int argc, char** argv)
 	eng.setSystem(sys);
 	eng.setWindow(win);
 
-	win.create(sf::VideoMode(800, 600), "Ludum Dare #33");
+	win.create(sf::VideoMode(800, 600), "LD33 - Enterprise Abuse TD");
 
 #ifndef NDEBUG
 	win.setFramerateLimit(250);

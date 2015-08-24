@@ -109,6 +109,10 @@ int Enemy::getGold() const
 
 	return 5 + int(10 * (mStrength - 1));
 }
+float Enemy::getStrength() const
+{
+	return mStrength;
+}
 
 void Enemy::tick(float dt)
 { PROFILE;

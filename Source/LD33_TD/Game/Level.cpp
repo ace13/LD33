@@ -45,7 +45,7 @@ void Level::addedToEntity()
 {
 	requestMessage("LD33.Tick", [this](const Kunlaboro::Message& msg) {
 		if (mRebuildPath) {
-			auto newPath = new Path(findPath({ 1, 10 }, { 8, 10 }));
+			auto newPath = new Path(findPath(sf::Vector2i(mStart), sf::Vector2i(mGoal)));
 			mRebuildPath = false;
 
 			sendGlobalMessage("Level.PathRebuilt", newPath);
@@ -105,8 +105,10 @@ void Level::addedToEntity()
 		msg.handle(mBestPath);
 	});
 	requestMessage("LoadLevel", [this](Kunlaboro::Message& msg){
-		loadFromFile(msg.payload.get<std::string>());
-		msg.handle(nullptr);
+		bool yes = loadFromFile(msg.payload.get<std::string>());
+		if (yes)
+			sendMessage("LevelLoaded");
+		msg.handle(yes);
 	}, true);
 
 	requestComponent("Game.Tower", [this](const Kunlaboro::Message&)
@@ -116,27 +118,44 @@ void Level::addedToEntity()
 	changeRequestPriority("Game.Tower", 9001);
 }
 
-void Level::loadFromFile(const std::string& file)
+bool Level::loadFromFile(const std::string& file)
 {
 	std::ifstream ifs(file.c_str());
 
-	if (!ifs || ifs.eof())
-		return;
+	mTiles.clear();
 
-	std::string title, subtitle;
-	std::getline(ifs, title);
-	std::getline(ifs, subtitle);
+	delete mBestPath;
+	mBestPath = new Path(Path::Invalid);
+
+	mLevelSize = mStart = mGoal = sf::Vector2u();
+	mName = mTitle = mSubtitle = "";
+
+	if (!ifs || ifs.eof())
+		return false;
+
+	std::getline(ifs, mName);
+	std::getline(ifs, mTitle);
+	std::getline(ifs, mSubtitle);
 
 	ifs >> mLevelSize.x >> mLevelSize.y
 		>> mStart.x >> mStart.y
 		>> mGoal.x >> mGoal.y;
 
+	if (!ifs || ifs.eof())
+		return false;
+
 	std::string temp;
 	std::getline(ifs, temp);
+
+	if (!ifs || ifs.eof())
+		return false;
 
 	mTiles.resize(mLevelSize.x * mLevelSize.y);
 	for (size_t y = 0; y < mLevelSize.y; ++y)
 	{
+		if (!ifs || ifs.eof())
+			return false;
+
 		std::string line;
 		std::getline(ifs, line);
 
@@ -158,8 +177,12 @@ void Level::loadFromFile(const std::string& file)
 	}
 
 	auto& wm = *dynamic_cast<WaveManager*>(getEntitySystem()->getAllComponentsOnEntity(getOwnerId(), "Game.WaveManager").front());
+	wm.clear();
+
 	unsigned int waves;
 	ifs >> waves;
+	if (!ifs || ifs.eof())
+		return false;
 
 	for (unsigned int i = 0; i < waves; ++i)
 	{
@@ -175,7 +198,13 @@ void Level::loadFromFile(const std::string& file)
 	}
 
 	mRebuildPath = true;
+	return true;
 }
+
+const std::string& Level::getName() const { return mName; }
+const std::string& Level::getTitle() const { return mTitle; }
+const std::string& Level::getSubtitle() const { return mSubtitle; }
+
 
 const sf::Vector2u& Level::getSize() const
 {

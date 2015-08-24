@@ -26,11 +26,15 @@ public:
 	~Level();
 
 	void addedToEntity();
-	void loadFromFile(const std::string& file);
+	bool loadFromFile(const std::string& file);
 	
 	Path findPath(const sf::Vector2i& from, const sf::Vector2i& to) const;
 
 	void draw(sf::RenderTarget& target);
+
+	const std::string& getName() const;
+	const std::string& getTitle() const;
+	const std::string& getSubtitle() const;
 
 	const sf::Vector2u& getSize() const;
 
@@ -41,6 +45,7 @@ private:
 	void drawTile(const sf::Vector2i& pos, Tile tile, sf::VertexArray& arr);
 	bool tilePassable(const sf::Vector2i& tile);
 
+	std::string mName, mTitle, mSubtitle;
 	sf::Vector2u mLevelSize, mStart, mGoal;
 	std::vector<Tile> mTiles;
 	sf::Texture mTilesTexture;

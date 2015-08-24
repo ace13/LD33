@@ -17,6 +17,7 @@ public:
 	void draw(sf::RenderTarget&);
 
 	void damage(float dmg);
+	
 
 	void markDeathHandled();
 	bool isDeathHandled() const;
@@ -24,6 +25,7 @@ public:
 	bool isAlive() const;
 	float getXP() const;
 	int getGold() const;
+	float getStrength() const;
 
 private:
 	bool mDeathHandled;

@@ -1,32 +1,44 @@
 #include "GameScreen.hpp"
 #include "Components.hpp"
+#include "Enemy.hpp"
+#include "Level.hpp"
 #include "Wave.hpp"
 #include "Towers/Basic.hpp"
 #include "UI/TowerRadial.hpp"
 
+#include <Base/Engine.hpp>
 #include <Base/Fonts.hpp>
+#include <Base/Music.hpp>
 #include <Base/Profiling.hpp>
 #include <Base/Tweening.hpp>
 #include <Base/VectorMath.hpp>
 
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
+#include <iostream>
+
 
 /// \FIXME TOO MUCH GLOBAL, VOLVO PLZ NERF
 RadialMenu asdf;
-int goldValue = 100, life = 100;
+int goldValue = 100;
+float life = 100;
 Profiler::TimePoint mouseDown;
-Easer waveEaser(Tween::QuadraticIn);
+Easer waveEaser(Tween::QuadraticIn), newspaperSizeEaser(Tween::QuarticOut), newspaperSpinEaser(Tween::QuadraticOut), newspaperAlphaEase(Tween::QuadraticIn);
 WaveManager* wMan;
-
+bool preLevel = false, wasWave = false;
+size_t lastEnemies = 0, levelCount = 1;
+Level* level;
+sf::Texture newspaperTex;
 
 GameScreen::GameScreen() : Kunlaboro::Component("Game.GameScreen"),
 	mMouseDown(false), mMenu(false), mSelectedTower(0), mTarget(nullptr)
 {
 	waveEaser.start(0, 1, 1);
 	waveEaser.update(1);
+	newspaperTex.loadFromFile("Resources/Newspaper.png");
 }
 void GameScreen::addedToEntity()
 {
@@ -37,17 +49,55 @@ void GameScreen::addedToEntity()
 	requestMessage("GotGold", [](const Kunlaboro::Message& msg) {
 		goldValue += msg.payload.get<int>();
 	});
+	requestMessage("Enemy.ReachedGoal", [this](const Kunlaboro::Message& msg) {
+		Enemy* send = (Enemy*)msg.sender;
+		life -= send->getStrength();
+
+		if (life <= 0)
+		{
+			std::cout << "TODO: Lose game" << std::endl;
+			((sf::RenderWindow*)mTarget)->close();
+		}
+	});
+	requestMessage("LevelLoaded", [this](const Kunlaboro::Message& msg){
+		levelCount++;
+		preLevel = true;
+
+		level = (Level*)msg.sender;
+		newspaperSizeEaser.start(0, 1, 4);
+		newspaperSpinEaser.start((1500 + rand() % 360) * ((rand() % 2) == 0 ? -1 : 1), 10 + (rand()%7), 4);
+		newspaperAlphaEase.start(0, 255, 6);
+
+		auto& man = Engine::get<MusicManager>();
+		man[3].setVolume(0);
+		man[4].setVolume(0);
+
+		man[3 + (rand() % 2)].setVolume(25, 2);
+	},true);
 
 	requestMessage("SetCamera", [this](const Kunlaboro::Message& msg) {
 		mCamera.setCenter(msg.payload.get<sf::Vector2f>());
 	});
 
-	requestMessage("LD33.Draw", [this](const Kunlaboro::Message& msg) { draw(*msg.payload.get<sf::RenderTarget*>()); });
+	requestMessage("LD33.Draw", [this](Kunlaboro::Message& msg) {
+		draw(*msg.payload.get<sf::RenderTarget*>());
+
+		if (preLevel)
+			msg.handle(nullptr);
+	});
 	requestMessage("LD33.DrawUI", [this](const Kunlaboro::Message& msg) { drawUI(*msg.payload.get<sf::RenderTarget*>()); });
 	changeRequestPriority("LD33.Draw", -9001);
 }
 void GameScreen::event(sf::Event& ev)
 {
+	if (preLevel)
+	{
+		if (ev.type == sf::Event::KeyReleased || ev.type == sf::Event::MouseButtonReleased)
+			preLevel = false;
+
+		return;
+	}
+
 	if (!asdf.isClosed())
 		asdf.event(ev);
 
@@ -71,7 +121,12 @@ void GameScreen::event(sf::Event& ev)
 				asdf.clearEntries();
 
 				if (wMan->getCurWave() == WaveManager::Wave::None)
-					asdf.addEntry("Begin Wave", "Resources/Start.png");
+				{
+					std::vector<Game::Physical*> test;
+					sendGlobalMessage("Game.Physical.Find", &test);
+					if (test.empty())
+						asdf.addEntry("Begin Wave", "Resources/Start.png");
+				}
 				asdf.setPosition({ float(ev.mouseButton.x), float(ev.mouseButton.y) });
 
 				auto resp = sendGlobalQuestion("Level.Valid", mTarget->mapPixelToCoords({ ev.mouseButton.x, ev.mouseButton.y }, mCamera));
@@ -139,6 +194,51 @@ void GameScreen::event(sf::Event& ev)
 }
 void GameScreen::update(float dt)
 {
+	if (preLevel)
+	{
+		newspaperSizeEaser.update(dt);
+		newspaperSpinEaser.update(dt);
+		newspaperAlphaEase.update(dt);
+
+		if (newspaperAlphaEase.atEnd())
+			preLevel = false;
+		return;
+	}
+
+	bool inWave = wMan->getCurWave() != WaveManager::Wave::None;
+	if (!inWave && wasWave)
+	{
+		auto& man = Engine::get<MusicManager>();
+		man[2].setVolume(0, 8);
+		man[1].setVolume(0, 8);
+		man[0].setVolume(0, 2);
+
+		man[3 + (rand() % 2)].setVolume(25, 5);
+	}
+	wasWave = inWave;
+
+	if (inWave)
+	{
+		std::vector<Game::Physical*> test;
+		sendGlobalMessage("Game.Physical.Find", &test);
+
+		auto& man = Engine::get<MusicManager>();
+		if (test.size() > 15 && lastEnemies < 10)
+		{
+			man[0].setVolume(10, 2);
+			lastEnemies = test.size();
+		}
+		else if (test.size() < 10 && lastEnemies > 15)
+		{
+			man[0].setVolume(0, 2);
+			lastEnemies = test.size();
+		}
+		else if (test.empty())
+		{
+
+		}
+	}
+
 	waveEaser.update(dt);
 	asdf.update(dt);
 
@@ -148,8 +248,34 @@ void GameScreen::update(float dt)
 
 		if (asdf.getSelection() == "Begin Wave")
 		{
-			sendMessage("NextWave");
-			waveEaser.reset();
+			if (wMan->getNextWave() == WaveManager::Wave::None)
+			{
+				std::vector<Game::Physical*> blockers;
+				auto aoe = sendGlobalQuestion("Game.Physical.Blocking", &blockers);
+				for (auto& tower : blockers)
+					getEntitySystem()->destroyEntity(tower->getOwnerId());
+
+				auto resp = sendQuestion("LoadLevel", "Resources/Level" + std::to_string(levelCount) + ".txt");
+
+
+				if (!resp.payload.get<bool>())
+				{
+					std::cout << "TODO: End game screen" << std::endl;
+					((sf::RenderWindow*)mTarget)->close();
+				}
+			}
+			else
+			{
+				auto& man = Engine::get<MusicManager>();
+				man[2].setVolume(75, 10);
+				man[1].setVolume(25, 15);
+
+				man[3].setVolume(0, 5);
+				man[4].setVolume(0, 5);
+
+				sendMessage("NextWave");
+				waveEaser.reset();
+			}
 			return;
 		}
 
@@ -208,6 +334,11 @@ void GameScreen::draw(sf::RenderTarget& target)
 		mCamera.setCenter(old.getCenter());
 		mCurZoom = 0.25;
 	}
+	
+	if (preLevel)
+	{
+		return;
+	}
 
 	target.setView(mCamera);
 
@@ -219,6 +350,49 @@ void GameScreen::draw(sf::RenderTarget& target)
 
 void GameScreen::drawUI(sf::RenderTarget& target)
 {
+	if (preLevel)
+	{
+		sf::Sprite news(newspaperTex);
+		news.setOrigin(sf::Vector2f(newspaperTex.getSize()) / 2.f - sf::Vector2f(10, 0));
+		news.setPosition(target.getView().getCenter());
+		news.setRotation(*newspaperSpinEaser);
+		news.setScale(*newspaperSizeEaser, *newspaperSizeEaser);
+		news.setColor(sf::Color(255, 255, 255, *newspaperAlphaEase));
+
+		target.draw(news);
+
+		sf::Vector2f y{
+			std::cos((*newspaperSpinEaser - 90) * float(M_PI) / 180.f),
+			std::sin((*newspaperSpinEaser - 90) * float(M_PI) / 180.f)
+		};
+
+		sf::Text title(level->getTitle(), sf::getDefaultFont(), 26);
+
+		auto bounds = title.getLocalBounds();
+		title.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+		title.setPosition(news.getPosition() + (y * 90.f));
+		title.setStyle(sf::Text::Bold);
+		title.setRotation(*newspaperSpinEaser);
+		title.setScale(*newspaperSizeEaser, *newspaperSizeEaser);
+		title.setColor(sf::Color(0, 0, 0, std::min(*newspaperAlphaEase * 2, 255.f)));
+
+		target.draw(title);
+
+		title.setString(level->getSubtitle());
+		title.setCharacterSize(16);
+
+		bounds = title.getLocalBounds();
+
+		title.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+		title.setPosition(news.getPosition() + (y * 60.f));
+
+		title.setColor(sf::Color(12, 12, 12, std::min(*newspaperAlphaEase * 2, 255.f)));
+
+		target.draw(title);
+
+		return;
+	}
+
 	asdf.draw(target);
 
 	sf::Text gold("Gold: ", sf::getDefaultFont(), 20);
@@ -238,7 +412,7 @@ void GameScreen::drawUI(sf::RenderTarget& target)
 	target.draw(gold);
 
 	gold.move(gold.getLocalBounds().width, 0);
-	gold.setString(std::to_string(life));
+	gold.setString(std::to_string(int(life)));
 
 
 	target.draw(gold);
