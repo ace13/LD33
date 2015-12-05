@@ -1,5 +1,7 @@
 #include "Path.hpp"
 
+#include <algorithm>
+
 const Path Path::Invalid;
 
 

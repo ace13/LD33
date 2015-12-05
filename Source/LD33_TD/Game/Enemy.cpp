@@ -7,6 +7,7 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 
 #include <algorithm>
+#include <cfloat>
 
 Enemy::Enemy() : Kunlaboro::Component("Game.Enemy"),
 	mStrength(1), mHealth(1), mDeathHandled(false)
